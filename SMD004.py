@@ -7,6 +7,7 @@ import traceback
 from serial.tools import list_ports
 
 
+
 class SMD004():
 	ser = None
 	def __init__(self, parent=None):
@@ -29,6 +30,8 @@ class SMD004():
 		r = self.write_(b"000000")
 		r = self.ser.readline()
 		return("Info:",r)
+	def close(self):
+		self.ser.close()
 	def eStop(self, stepper=3):
 		u'''
 		Назначение: стоп вращения двигателя.
