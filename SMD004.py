@@ -8,11 +8,17 @@ from serial.tools import list_ports
 
 
 
+
 class SMD004():
 	ser = None
+	connected = False
+	serThread = None
+	SM_state = {}
+	started = False
 	def __init__(self, parent=None):
 		self.eInit()
 		ser = None
+
 	def eInit(self):
 		pass
 		#self.ser = serial.Serial("COM3", baudrate=19200, timeout=0.1, bytesize=serial.EIGHTBITS)
@@ -29,9 +35,33 @@ class SMD004():
 		self.ser.flushOutput()
 		r = self.write_(b"000000")
 		r = self.ser.readline()
+
+		self.connected = True
+		self.serThread = threading.Timer(1,self.read_from_port)
+		self.serThread.start()
 		return("Info:",r)
+
+	def read_from_port(self):
+		while not self.started:
+			self.started = True
+			while self.isConnected():
+				try:
+					#print('$'*100)
+					state=self.eGetState()
+					time.sleep(1)
+					#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
+					#print("@"*10,state,"@"*10)
+					#self.handle_data(reading)
+				except serial.serialutil.SerialException:
+					print('----------')
+
 	def close(self):
+		self.connected = False	
+
+		self.serThread.cancel()
+
 		self.ser.close()
+		self.started = False
 	def eStop(self, stepper=3):
 		u'''
 		Назначение: стоп вращения двигателя.
@@ -56,7 +86,7 @@ class SMD004():
 		'''
 		self.write(b"FF00010" + str(stepper).encode())
 
-	def eSetParams(self,stepper=1,mode='ccw_step',steps=0):
+	def eSetParams(self,stepper=1,mode='ccw_step',steps=0,prev=False):
 		u'''
 		Назначение: установка режима вращения двигателя.
 		Байт		1-й		2-й		3-й		4-й		5-й
@@ -69,6 +99,7 @@ class SMD004():
 		Ответ модуля: возвращает принятые байты без изменений.     
 
 		'''
+
 		m = {'ccw_step' : b'\x01',
 			 'ccw2stop' : b'\x00',
 			 'cw_step'  : b'\x81',
@@ -81,7 +112,15 @@ class SMD004():
 		#	if len(s[0])<len(s[1]): s[0] = '0'+s[0]
 		#	elif len(s[0])>len(s[1]): s[1] = '0'+s[1]
 		
-		self.write_(b"\xFF\x02\x04"+bytearray([stepper]) + m[mode]+s)
+		#self.write_(b"\xFF\x02\x04"+bytearray([stepper]) + m[mode]+s)
+		if prev:
+			try:
+				code_mode = self.SM_state['SM'+str(stepper)+"_mode"]
+				self.write_(b"\xFF\x02\x04"+bytearray([stepper]) + code_mode + s)
+			except:
+				pass
+		else:
+			self.write_(b"\xFF\x02\x04"+bytearray([stepper]) + m[mode]+s)
 	def eSetTactFreq(self, stepper=1, freq=68):
 		u'''
 		Назначение: установка скорости вращения двигателя.
@@ -89,12 +128,17 @@ class SMD004():
 		Значение	Адрес	03 hex	05 hex	Номер двигателя	Длительность полу-периода тактовой частоты дви¬га¬теля в десятках микро¬се-кунд (млад¬шим байтом впе¬ред)	Контроль¬ная сумма
 		Ответ модуля: возвращает принятые байты без изменений
 		'''
-		print(self.write_(b'\xFF\x03\x05'+bytearray([stepper])+(freq).to_bytes(4,'little')))
+		#print(
+		self.write_(b'\xFF\x03\x05'+bytearray([stepper])+(freq).to_bytes(4,'little'))
+		#)
 
 	def isConnected(self):
 		try:
-			self.ser.inWaiting()
-			return 1
+			if self.connected == True:
+				self.ser.inWaiting()
+				return 1
+			else:
+				return 0
 		except:
 			print ("Lost connection!")
 			return 0
@@ -108,7 +152,9 @@ class SMD004():
 		Ответ модуля: возвращает принятые байты без изменений.
 
 		'''
-		print(self.write_(b'\xFF\x05\x01'+bytearray([stepper])))
+		#print(
+		self.write_(b'\xFF\x05\x01'+bytearray([stepper]))
+		#)
 	def eSetMulty(self,stepper=1, multy=1):
 		u'''
 		Назначение: установка множителя полупериода тактовой частоты двигателя.
@@ -118,7 +164,8 @@ class SMD004():
 		Примечание к команде 6.
 		Фактическая длительность полупериода тактовой частоты равна величине, заданной командой 3, умноженной на величину множителя, заданную данной командой.
 		'''
-		print(self.write_(b'\xFF\x06\x02'+bytearray([stepper])+bytearray([multy])))
+		#print(
+		self.write_(b'\xFF\x06\x02'+bytearray([stepper])+bytearray([multy]))#)
 	def eWriteMarchIHoldICode(self,stepper, Im=0, Is=0):
 		u'''
 		Назначение: установка маршевого тока и тока удержания двигателей.
@@ -143,7 +190,9 @@ class SMD004():
 		 1,2 А. Изменить значения ступеней регулирования тока можно только изменением номиналов электронных 
 		 компонентов внутри модуля.
 		'''
-		print(self.write_(b'\xFF\x07\x03'+bytearray([stepper])+bytearray([Im])+bytearray([Is])))
+		#print(
+		self.write_(b'\xFF\x07\x03'+bytearray([stepper])+bytearray([Im])+bytearray([Is]))
+		#)
 	def eSetPhaseMode(self, stepper, mode='1x'):
 		u'''
 		•	Команда 8.
@@ -169,8 +218,8 @@ class SMD004():
 		#state = self.eGetState(0.02)
 		#print('State', state)
 		#def f():
-			self.eSetParams(stepper,'ccw_step',steps)
-			self.eStart(stepper)
+		self.eSetParams(stepper,'ccw_step',steps)
+		self.eStart(stepper)
 		#if state[3] == 0:
 		#	f()
 		#else:
@@ -181,8 +230,8 @@ class SMD004():
 
 		#print('State', state)
 		#def f():
-			self.eSetParams(stepper,'cw_step',steps)
-			self.eStart(stepper)
+		self.eSetParams(stepper,'cw_step',steps)
+		self.eStart(stepper)
 		#if state[3] == 0:
 		#	f()
 		#else:
@@ -222,73 +271,84 @@ class SMD004():
 		Пример 2. После включения питания модуля двигатель сделал 100 шагов в обратном направлении. Значение счетчика шагов составит 65436 (т.е. 65536 –100).
 
 		'''
-		r = self.write(b"FF0400",delay)
-		address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
-		SM1_steps = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little',signed=True)
-		SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little',signed=True) 
-		endstops = [int(i) for i in bin(endstops)[2:6]][::-1]
-		#time.sleep(0.5)
-		#r = self.ser.readline()
-		return r, [SMs_state,SM1_steps,SM2_steps,endstops]
-
+		if self.isConnected():
+			
+			r = self.write(b"FF0400",delay)
+			if len(r)==12:
+				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
+				SM1_steps = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little',signed=True)
+				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little',signed=True) 
+				endstops = [int(i) for i in bin(endstops)[2:6]][::-1]
+				#time.sleep(0.5)
+				#r = self.ser.readline()
+				if len(endstops)==4:
+					self.SM_state = {'SMs_state':SMs_state,	'SM1_steps':SM1_steps, 'SM1_mode':SM1_mode,
+															'SM2_steps':SM2_steps, 'SM2_mode':SM2_mode,
+															'SM1_end1':endstops[0], 'SM1_end2':endstops[1],
+															'SM2_end1':endstops[2], 'SM2_end2':endstops[3]}
+															
+					return self.SM_state, r
+				#return r, SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
 	def getState(self, ATrtAddr=255, motor=0):
 		return [0,0,0]
 
 	def write(self, data,sleep=0.02):
-		s = data
-		s = self.cSum(s)
-	
-		# s = s.replace('\x','')
+		if self.isConnected():
+			s = data
+			s = self.cSum(s)
 		
-		print( data, s, self.str2hex(s),type(s), '='*10)
-		#s = bytes(s, 'utf-8')
-		#self.ser.baudrate = 19200
-		#self.ser.parity = serial.PARITY_MARK
-		#self.ser.bytesize = serial.EIGHTBITS
-		#self.ser.stopbits = serial.STOPBITS_ONE
-		self.ser.write(s[:2])
-		print(self.str2hex(s[:2]))
-		
-		#self.ser.baudrate = 19200
-		#self.ser.parity = serial.PARITY_SPACE
-		#self.ser.bytesize = serial.EIGHTBITS
-		#self.ser.stopbits = serial.STOPBITS_ONE
-		self.ser.write(s[2:])
-		print(self.str2hex(s[2:]))
-		#self.ser.read() 
-		time.sleep(sleep)
-		r = self.ser.readline()
-		print(">"*10,codecs.encode(r,'hex'), r)
-		return r
+			# s = s.replace('\x','')
+			
+			#print( data, s, self.str2hex(s),type(s), '='*10)
+			#s = bytes(s, 'utf-8')
+			#self.ser.baudrate = 19200
+			#self.ser.parity = serial.PARITY_MARK
+			#self.ser.bytesize = serial.EIGHTBITS
+			#self.ser.stopbits = serial.STOPBITS_ONE
+			self.ser.write(s[:2])
+			#print(self.str2hex(s[:2]))
+			
+			#self.ser.baudrate = 19200
+			#self.ser.parity = serial.PARITY_SPACE
+			#self.ser.bytesize = serial.EIGHTBITS
+			#self.ser.stopbits = serial.STOPBITS_ONE
+			self.ser.write(s[2:])
+			#print(self.str2hex(s[2:]))
+			#self.ser.read() 
+			time.sleep(sleep)
+			r = self.ser.readline()
+			print(">"*10, r)
+			return r
 	def write_(self, data,sleep=0.01):
-		s = data
-		s = self.cSum(s,bytesA=True)
-	
-		# s = s.replace('\x','')
+		if self.isConnected():
+			s = data
+			s = self.cSum(s,bytesA=True)
 		
-		print( data, s, self.str2hex(s),type(s), '='*10)
-		#s = bytes(s, 'utf-8')
-		#self.ser.baudrate = 19200
-		self.ser.parity = serial.PARITY_MARK
-		#self.ser.bytesize = serial.EIGHTBITS
-		#self.ser.stopbits = serial.STOPBITS_ONE
-		self.ser.write(s[:2])
-		print(self.str2hex(s[:2]))
-		
-		#self.ser.baudrate = 19200
-		#self.ser.parity = serial.PARITY_SPACE
-		#self.ser.bytesize = serial.EIGHTBITS
-		#self.ser.stopbits = serial.STOPBITS_ONE
-		self.ser.write(s[2:-2])
-		print(self.str2hex(s[2:-2]))
-		self.ser.write(s[-2:])
-		print(self.str2hex(s[-2:]))
+			# s = s.replace('\x','')
+			
+			#print( data, s, self.str2hex(s),type(s), '='*10)
+			#s = bytes(s, 'utf-8')
+			#self.ser.baudrate = 19200
+			self.ser.parity = serial.PARITY_MARK
+			#self.ser.bytesize = serial.EIGHTBITS
+			#self.ser.stopbits = serial.STOPBITS_ONE
+			self.ser.write(s[:2])
+			#print(self.str2hex(s[:2]))
+			
+			#self.ser.baudrate = 19200
+			#self.ser.parity = serial.PARITY_SPACE
+			#self.ser.bytesize = serial.EIGHTBITS
+			#self.ser.stopbits = serial.STOPBITS_ONE
+			self.ser.write(s[2:-2])
+			#print(self.str2hex(s[2:-2]))
+			self.ser.write(s[-2:])
+			#print(self.str2hex(s[-2:]))
 
-		#self.ser.read() 
-		time.sleep(sleep)
-		r = self.ser.readline()
-		print(">"*10,codecs.encode(r,'hex'), r)
-		return r
+			#self.ser.read() 
+			time.sleep(sleep)
+			r = self.ser.readline()
+			print(">"*10, r)
+			return r
 	def int2B(self, b):
 		return (b&0xff, (b&0xff00)>>8)
 
@@ -302,7 +362,7 @@ class SMD004():
 			bb = base64.b16decode(string)
 		else: bb = string
 		s = sum(bb[:-1])
-		print(s)
+		#print(s)
 		if s > 255:
 			s = bytearray((s).to_bytes(2, 'little'))[1]
 		string = bb + chr(s).encode('utf-8')
@@ -322,12 +382,14 @@ if __name__ == "__main__":
 	try:
 		#e.eStartLeft()
 		#f = lambda : e.eStop()
-		import time
+		
 		#time.sleep(2)
 		#e.eStop()
-		e.eSetTactFreq(1,160)
 		e.eClearStep(3)
+		e.eSetTactFreq(1,160)
 		e.eSetMulty(1,1)
+
+		
 		#e.makeStepCCW(steps=600)
 		#e.makeStepCW(steps=300)
 		#e.eStartLeft()
@@ -343,14 +405,14 @@ if __name__ == "__main__":
 		print('-'*50)
 		e.eWriteMarchIHoldICode(1,1,0)
 		e.eSetPhaseMode(1,1)
-		e.makeStepCW(1,200,True)
+		e.makeStepCW(1,2000,True)
 		#e.moveCW(1,50)
 		#time.sleep(1)
 		
-		state=e.eGetState()
-		while state[1][0]!=0:
-			state=e.eGetState()
-			print('State:',state)
+		#state=e.eGetState()
+		#while state[1][0]!=0:
+		#	state=e.eGetState()
+		#	print('State:',state)
 		#e.makeStepCCW(1,50,True)
 		'''
 		threading.Timer(5,f).start()
@@ -364,7 +426,9 @@ if __name__ == "__main__":
 		#e.makeStepCCW(1,50,True)
 	except:
 		traceback.print_exc()
-		e.ser.close()	
-	e.ser.close()
+		#e.ser.close()	
+	time.sleep(5)
+	e.eStop()
+	e.close()
 	print(e.isConnected())
 
