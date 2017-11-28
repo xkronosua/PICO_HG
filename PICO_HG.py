@@ -263,9 +263,9 @@ class nanoScat_PD(QtGui.QMainWindow):
 
 	def initUi(self):
 		self.pw = pg.PlotWidget(name='Plot1')  ## giving the plots names allows us to link their axes together
-		self.ui.l.addWidget(self.pw)
+		self.ui.dataPlot.addWidget(self.pw)
 		self.pw2 = pg.PlotWidget(name='Plot2')
-		self.ui.l.addWidget(self.pw2)
+		self.ui.dataPlot.addWidget(self.pw2)
 		self.osc_pw = pg.PlotWidget(name='Plot3')
 		self.ui.oscilloPlot.addWidget(self.osc_pw)
 		#self.osc_pw.setXRange(0, 360)
@@ -277,6 +277,7 @@ class nanoScat_PD(QtGui.QMainWindow):
 		#self.osc_pw.showAxis('bottom', False)
 		self.osc_pw.setYRange(0, 256)
 		self.osc_pw.setXRange(0, 2048)
+		self.osc_pw.setMaximumWidth(300)
 		lr = pg.LinearRegionItem([1500,1800])
 		lr.setZValue(-10)
 		self.osc_pw.addItem(lr)
@@ -304,7 +305,7 @@ class nanoScat_PD(QtGui.QMainWindow):
 		self.line3.setPen(QtGui.QColor("cyan"))
 
 		self.pw.setLabel('left', 'Signal', units='arb. un.')
-		self.pw.setLabel('bottom', 'Angle', units='deg.')
+		self.pw.setLabel('bottom', 'position', units='deg.')
 		self.pw.setXRange(0, 360)
 		self.pw.setYRange(0, 1e10)
 		#self.pw2.setMaximumHeight(300)

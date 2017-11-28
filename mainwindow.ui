@@ -35,6 +35,12 @@
         <height>0</height>
        </size>
       </property>
+      <property name="maximumSize">
+       <size>
+        <width>400</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -52,7 +58,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>479</width>
+         <width>400</width>
          <height>644</height>
         </rect>
        </property>
@@ -68,27 +74,15 @@
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="4" column="5">
-           <widget class="QPushButton" name="CCWMoveToStop">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
+          <item row="3" column="0">
+           <widget class="QToolButton" name="setStepperSpeed">
             <property name="text">
-             <string>&gt;&gt;&gt;||</string>
+             <string>setSpeed</string>
             </property>
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QPushButton" name="CWMoveToStop">
+           <widget class="QToolButton" name="CWMoveToStop">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -107,38 +101,12 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QPushButton" name="openAngleSensorPort">
+           <widget class="QToolButton" name="openAngleSensorPort">
             <property name="text">
              <string>Open</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QPushButton" name="CWHome">
-            <property name="maximumSize">
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>&lt;&lt;Home</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="5">
-           <widget class="QPushButton" name="CCWHome">
-            <property name="maximumSize">
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Home&gt;&gt;</string>
             </property>
            </widget>
           </item>
@@ -162,70 +130,14 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="3" colspan="3">
-           <widget class="QPushButton" name="stepperStop">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="1" column="0" rowspan="2" colspan="5">
+           <widget class="QSlider" name="stepperSpeed">
             <property name="maximumSize">
              <size>
-              <width>100</width>
-              <height>50</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">border: 1px solid red;</string>
-            </property>
-            <property name="text">
-             <string>STOP</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4" colspan="2">
-           <widget class="QPushButton" name="setCustomAngle">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
+              <width>200</width>
               <height>16777215</height>
              </size>
             </property>
-            <property name="text">
-             <string>setAngle</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="setStepperSpeed">
-            <property name="text">
-             <string>setSpeed</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="3">
-           <widget class="QPushButton" name="moveToAngle">
-            <property name="text">
-             <string>moveTo</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="stepperLock">
-            <property name="text">
-             <string>lock</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" rowspan="2" colspan="5">
-           <widget class="QSlider" name="stepperSpeed">
             <property name="minimum">
              <number>50</number>
             </property>
@@ -250,8 +162,807 @@
             </property>
            </widget>
           </item>
+          <item row="5" column="0">
+           <widget class="QToolButton" name="CWHome">
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>&lt;&lt;Home</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QToolButton" name="CCWMoveToStop">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>&gt;&gt;&gt;||</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="5">
+           <widget class="QToolButton" name="CCWHome">
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Home&gt;&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QToolButton" name="stepperStop">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">border: 1px solid red;</string>
+            </property>
+            <property name="text">
+             <string>STOP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" colspan="3">
+           <widget class="QToolButton" name="stepperLock">
+            <property name="text">
+             <string>lock</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="5">
+           <widget class="QToolButton" name="setCustomAngle">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>setAngle</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="4">
+           <widget class="QToolButton" name="moveToAngle">
+            <property name="text">
+             <string>moveTo</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="Settings">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>400</width>
+         <height>644</height>
+        </rect>
+       </property>
+       <attribute name="label">
+        <string>FILTERS</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="title">
+           <string>Filters</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="0" column="0">
+              <widget class="QToolButton" name="prevFilter">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>&lt;&lt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QToolButton" name="nextFilter">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>&gt;&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QTableWidget" name="filtersTab">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="rowCount">
+                <number>6</number>
+               </property>
+               <property name="columnCount">
+                <number>3</number>
+               </property>
+               <row>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </row>
+               <column>
+                <property name="text">
+                 <string>name</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>value</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>range</string>
+                </property>
+               </column>
+               <item row="0" column="0">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="0" column="1">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="0" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="1" column="0">
+                <property name="text">
+                 <string>op06</string>
+                </property>
+               </item>
+               <item row="1" column="1">
+                <property name="text">
+                 <string>0.251188643150958</string>
+                </property>
+               </item>
+               <item row="1" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="2" column="0">
+                <property name="text">
+                 <string>op09</string>
+                </property>
+               </item>
+               <item row="2" column="1">
+                <property name="text">
+                 <string>0.12589254117941673
+</string>
+                </property>
+               </item>
+               <item row="2" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="3" column="0">
+                <property name="text">
+                 <string>op18</string>
+                </property>
+               </item>
+               <item row="3" column="1">
+                <property name="text">
+                 <string>0.015848931924611134</string>
+                </property>
+               </item>
+               <item row="3" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="4" column="0">
+                <property name="text">
+                 <string>op09,op18,op18</string>
+                </property>
+               </item>
+               <item row="4" column="1">
+                <property name="text">
+                 <string>3.1622776601683795e-05</string>
+                </property>
+               </item>
+               <item row="4" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+               <item row="5" column="0">
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </item>
+               <item row="5" column="1">
+                <property name="text">
+                 <string>1e-22</string>
+                </property>
+               </item>
+               <item row="5" column="2">
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <widget class="QGroupBox" name="groupBox">
+             <property name="title">
+              <string>Config</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QTableWidget" name="globalConfig">
+                <row>
+                 <property name="text">
+                  <string>Wavelength</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>AngleCalibr</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Object</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Distance</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </row>
+                <column>
+                 <property name="text">
+                  <string>value</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>comments</string>
+                 </property>
+                </column>
+                <item row="0" column="0">
+                 <property name="text">
+                  <string>1064</string>
+                 </property>
+                </item>
+                <item row="0" column="1">
+                 <property name="text">
+                  <string>nm</string>
+                 </property>
+                </item>
+                <item row="1" column="0">
+                 <property name="text">
+                  <string>0.5</string>
+                 </property>
+                </item>
+                <item row="3" column="0">
+                 <property name="text">
+                  <string>34</string>
+                 </property>
+                </item>
+                <item row="3" column="1">
+                 <property name="text">
+                  <string>cm</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="saveConfig">
+                <property name="text">
+                 <string>save</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="SMD">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>311</width>
+         <height>728</height>
+        </rect>
+       </property>
+       <attribute name="label">
+        <string>SMD</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QToolButton" name="SMD_connect">
+          <property name="text">
+           <string>connect</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>SM1</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="4" column="2">
+              <widget class="QCheckBox" name="SM1_lock">
+               <property name="text">
+                <string>Lock</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Endstops:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="4">
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="1" column="3">
+                <widget class="QToolButton" name="SM1_stepRight">
+                 <property name="text">
+                  <string>&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="4">
+                <widget class="QToolButton" name="SM1_right2end">
+                 <property name="text">
+                  <string>&gt;&gt;|</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QToolButton" name="SM1_stepLeft">
+                 <property name="text">
+                  <string>&lt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QToolButton" name="SM1_left2end">
+                 <property name="text">
+                  <string>|&lt;&lt;</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="4" column="1">
+              <widget class="QToolButton" name="SM1_absMove">
+               <property name="text">
+                <string>MoveTo</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="4">
+              <widget class="QLabel" name="SM1_position">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                 <weight>75</weight>
+                 <italic>true</italic>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Position</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QToolButton" name="SM1_stop">
+               <property name="text">
+                <string>stop</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QToolButton" name="SM1_reset">
+               <property name="text">
+                <string>reset</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" colspan="3">
+              <widget class="QDoubleSpinBox" name="SM1_step">
+               <property name="decimals">
+                <number>6</number>
+               </property>
+               <property name="minimum">
+                <double>0.000001000000000</double>
+               </property>
+               <property name="maximum">
+                <double>99999999999.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1">
+              <widget class="QCheckBox" name="SM1_leftEndstop">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="autoRepeat">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="2">
+              <widget class="QCheckBox" name="SM1_rightEndstop">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1" colspan="3">
+              <widget class="QSlider" name="SM1_speed">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="pageStep">
+                <number>20</number>
+               </property>
+               <property name="value">
+                <number>160</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>SM2</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_9">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="4" column="2">
+              <widget class="QCheckBox" name="checkBox_2">
+               <property name="text">
+                <string>Lock</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Endstops:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="4">
+              <layout class="QGridLayout" name="gridLayout_6">
+               <item row="1" column="3">
+                <widget class="QToolButton" name="toolButton_5">
+                 <property name="text">
+                  <string>&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="4">
+                <widget class="QToolButton" name="toolButton_8">
+                 <property name="text">
+                  <string>&gt;&gt;|</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QToolButton" name="toolButton_9">
+                 <property name="text">
+                  <string>&lt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QToolButton" name="toolButton_10">
+                 <property name="text">
+                  <string>|&lt;&lt;</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="4" column="1">
+              <widget class="QToolButton" name="toolButton_13">
+               <property name="text">
+                <string>MoveTo</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="0" colspan="2">
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+             </item>
+             <item row="3" column="0" colspan="4">
+              <widget class="QLabel" name="label_6">
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Position</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="1" colspan="2">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Endstops</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QToolButton" name="toolButton_14">
+               <property name="text">
+                <string>stop</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QToolButton" name="toolButton_15">
+               <property name="text">
+                <string>reset</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="main_view">
+      <item row="2" column="2" rowspan="2">
+       <layout class="QVBoxLayout" name="oscilloPlot">
         <item>
          <layout class="QGridLayout" name="oscillo_config">
           <item row="0" column="0">
@@ -713,7 +1424,7 @@
              <string>Auto</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -747,734 +1458,8 @@
          </layout>
         </item>
        </layout>
-      </widget>
-      <widget class="QWidget" name="Settings">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>479</width>
-         <height>644</height>
-        </rect>
-       </property>
-       <attribute name="label">
-        <string>FILTERS</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QGroupBox" name="groupBox_4">
-          <property name="title">
-           <string>Filters</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_7">
-           <item row="0" column="0">
-            <layout class="QGridLayout" name="gridLayout_8">
-             <item row="0" column="0">
-              <widget class="QToolButton" name="prevFilter">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>&lt;&lt;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QToolButton" name="nextFilter">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>&gt;&gt;</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0" colspan="2">
-              <widget class="QTableWidget" name="filtersTab">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="rowCount">
-                <number>6</number>
-               </property>
-               <property name="columnCount">
-                <number>3</number>
-               </property>
-               <row>
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </row>
-               <row>
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </row>
-               <row>
-                <property name="text">
-                 <string>2</string>
-                </property>
-               </row>
-               <row>
-                <property name="text">
-                 <string>3</string>
-                </property>
-               </row>
-               <row>
-                <property name="text">
-                 <string>4</string>
-                </property>
-               </row>
-               <row>
-                <property name="text">
-                 <string>5</string>
-                </property>
-               </row>
-               <column>
-                <property name="text">
-                 <string>name</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>value</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>range</string>
-                </property>
-               </column>
-               <item row="0" column="0">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="0" column="1">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="0" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="1" column="0">
-                <property name="text">
-                 <string>op06</string>
-                </property>
-               </item>
-               <item row="1" column="1">
-                <property name="text">
-                 <string>0.251188643150958</string>
-                </property>
-               </item>
-               <item row="1" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="2" column="0">
-                <property name="text">
-                 <string>op09</string>
-                </property>
-               </item>
-               <item row="2" column="1">
-                <property name="text">
-                 <string>0.12589254117941673
-</string>
-                </property>
-               </item>
-               <item row="2" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="3" column="0">
-                <property name="text">
-                 <string>op18</string>
-                </property>
-               </item>
-               <item row="3" column="1">
-                <property name="text">
-                 <string>0.015848931924611134</string>
-                </property>
-               </item>
-               <item row="3" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="4" column="0">
-                <property name="text">
-                 <string>op09,op18,op18</string>
-                </property>
-               </item>
-               <item row="4" column="1">
-                <property name="text">
-                 <string>3.1622776601683795e-05</string>
-                </property>
-               </item>
-               <item row="4" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-               <item row="5" column="0">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </item>
-               <item row="5" column="1">
-                <property name="text">
-                 <string>1e-22</string>
-                </property>
-               </item>
-               <item row="5" column="2">
-                <property name="text">
-                 <string>1</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0">
-            <widget class="QGroupBox" name="groupBox">
-             <property name="title">
-              <string>Config</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <item>
-               <widget class="QTableWidget" name="globalConfig">
-                <row>
-                 <property name="text">
-                  <string>Wavelength</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>AngleCalibr</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>Object</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string>Distance</string>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <row>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </row>
-                <column>
-                 <property name="text">
-                  <string>value</string>
-                 </property>
-                </column>
-                <column>
-                 <property name="text">
-                  <string>comments</string>
-                 </property>
-                </column>
-                <item row="0" column="0">
-                 <property name="text">
-                  <string>1064</string>
-                 </property>
-                </item>
-                <item row="0" column="1">
-                 <property name="text">
-                  <string>nm</string>
-                 </property>
-                </item>
-                <item row="1" column="0">
-                 <property name="text">
-                  <string>0.5</string>
-                 </property>
-                </item>
-                <item row="3" column="0">
-                 <property name="text">
-                  <string>34</string>
-                 </property>
-                </item>
-                <item row="3" column="1">
-                 <property name="text">
-                  <string>cm</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="saveConfig">
-                <property name="text">
-                 <string>save</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="SMD">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>459</width>
-         <height>728</height>
-        </rect>
-       </property>
-       <attribute name="label">
-        <string>SMD</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QToolButton" name="SMD_connect">
-          <property name="text">
-           <string>connect</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_2">
-          <property name="title">
-           <string>SM1</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_10">
-           <item row="0" column="0">
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="4" column="2">
-              <widget class="QCheckBox" name="SM1_lock">
-               <property name="text">
-                <string>Lock</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Endstops:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0" colspan="4">
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="1" column="3">
-                <widget class="QToolButton" name="SM1_stepRight">
-                 <property name="text">
-                  <string>&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="4">
-                <widget class="QToolButton" name="SM1_right2end">
-                 <property name="text">
-                  <string>&gt;&gt;|</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QToolButton" name="SM1_stepLeft">
-                 <property name="text">
-                  <string>&lt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QToolButton" name="SM1_left2end">
-                 <property name="text">
-                  <string>|&lt;&lt;</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="4" column="1">
-              <widget class="QToolButton" name="SM1_absMove">
-               <property name="text">
-                <string>MoveTo</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0" colspan="4">
-              <widget class="QLabel" name="SM1_position">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>50</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>100</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>18</pointsize>
-                 <weight>75</weight>
-                 <italic>true</italic>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="text">
-                <string>Position</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QToolButton" name="SM1_stop">
-               <property name="text">
-                <string>stop</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QToolButton" name="SM1_reset">
-               <property name="text">
-                <string>reset</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="3">
-              <widget class="QDoubleSpinBox" name="SM1_step">
-               <property name="decimals">
-                <number>6</number>
-               </property>
-               <property name="minimum">
-                <double>0.000001000000000</double>
-               </property>
-               <property name="maximum">
-                <double>99999999999.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QCheckBox" name="SM1_leftEndstop">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="autoRepeat">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="2">
-              <widget class="QCheckBox" name="SM1_rightEndstop">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1" colspan="3">
-              <widget class="QSlider" name="SM1_speed">
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>255</number>
-               </property>
-               <property name="pageStep">
-                <number>20</number>
-               </property>
-               <property name="value">
-                <number>160</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBox_3">
-          <property name="title">
-           <string>SM2</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_9">
-           <item row="0" column="0">
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="4" column="2">
-              <widget class="QCheckBox" name="checkBox_2">
-               <property name="text">
-                <string>Lock</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Endstops:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0" colspan="4">
-              <layout class="QGridLayout" name="gridLayout_6">
-               <item row="1" column="3">
-                <widget class="QToolButton" name="toolButton_5">
-                 <property name="text">
-                  <string>&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="4">
-                <widget class="QToolButton" name="toolButton_8">
-                 <property name="text">
-                  <string>&gt;&gt;|</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QToolButton" name="toolButton_9">
-                 <property name="text">
-                  <string>&lt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QToolButton" name="toolButton_10">
-                 <property name="text">
-                  <string>|&lt;&lt;</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="4" column="1">
-              <widget class="QToolButton" name="toolButton_13">
-               <property name="text">
-                <string>MoveTo</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="0" colspan="2">
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
-             </item>
-             <item row="3" column="0" colspan="4">
-              <widget class="QLabel" name="label_6">
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>50</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Position</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1" colspan="2">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Endstops</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QToolButton" name="toolButton_14">
-               <property name="text">
-                <string>stop</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QToolButton" name="toolButton_15">
-               <property name="text">
-                <string>reset</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="l">
-      <item>
-       <layout class="QHBoxLayout" name="fileConfig">
-        <item>
-         <widget class="QToolButton" name="saveToBtn">
-          <property name="text">
-           <string>File ...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="saveToPath">
-          <property name="text">
-           <string>./test.txt</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
+      <item row="1" column="0" colspan="3">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="spacing">
          <number>6</number>
@@ -1595,13 +1580,6 @@ color: #222222;</string>
          </widget>
         </item>
         <item>
-         <widget class="QToolButton" name="cleanPlot">
-          <property name="text">
-           <string>clean</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QDoubleSpinBox" name="plotPeriod">
           <property name="maximumSize">
            <size>
@@ -1622,10 +1600,55 @@ color: #222222;</string>
         </item>
        </layout>
       </item>
+      <item row="2" column="0" rowspan="2" colspan="2">
+       <layout class="QVBoxLayout" name="dataPlot">
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>300</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <layout class="QHBoxLayout" name="fileConfig">
+        <item>
+         <widget class="QToolButton" name="saveToBtn">
+          <property name="text">
+           <string>File ...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="saveToPath">
+          <property name="text">
+           <string>./test.txt</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
-    </item>
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="oscilloPlot"/>
     </item>
    </layout>
   </widget>
