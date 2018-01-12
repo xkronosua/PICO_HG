@@ -1,10 +1,20 @@
 import time
 import serial
+import threading
 
 class HAMEG(object):
 	
 	ser = None
-	
+	connected = False
+	serThread = None
+	HAMEG_state = {}
+	started = False
+	vdiv1_ = None
+	vdiv2_ = None
+	tdiv_  = None
+	CH1WF = None
+	CH2WF = None
+
 	def __init__(self):
 		pass
 	def connect(self):
@@ -16,16 +26,42 @@ class HAMEG(object):
 		parity='N',
 		stopbits=serial.STOPBITS_TWO,
 		bytesize=8,
-		timeout=0.1
+		timeout=3
 		)
+		self.connected = True
+		self.serThread = threading.Timer(2,self.read_from_CH)
+		self.serThread.start()
 		return self.ser.isOpen()
+	def handle_data(self,data):
+		print(data)
+	def read_from_CH(self):
+		while not self.started:
+			self.started = True
+			while self.isConnected():
+				try:
+					#print('$'*100)
+					data=self.getData()
+
+					time.sleep(0.5)
+					#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
+					#print("@"*10,state,"@"*10)
+					self.handle_data(data)
+				except serial.serialutil.SerialException:
+					print('----------')
+	def getData(self):
+		self.CH1WF = self.rdwf1(offset=b'\x00\x00',max_len=b'\x00\x01')
+		print(self.CH1WF)
+		self.CH2WF = self.rdwf2(offset=b'\x00\x00',max_len=b'\x00\x01')
 
 	def disconnect(self):
 		self.ser.write("RM0".encode('ASCII')+bytearray([13,10]))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def close(self):
+		self.connected = False	
+		self.serThread.cancel()
+		self.started = False
 		return self.ser.close()
 
 	def init(self):
@@ -43,10 +79,19 @@ class HAMEG(object):
 	def autoset(self):
 		print("AUTOSET")
 		self.ser.write("AUTOSET".encode('ASCII')+bytearray([13, 10]))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
-
+	def isConnected(self):
+		try:
+			if self.connected == True:
+				self.ser.inWaiting()
+				return 1
+			else:
+				return 0
+		except:
+			print ("Lost connection!")
+			return 0
 
 	def ypos1(self, yp1):
 		"""[0 30]"""
@@ -97,37 +142,41 @@ class HAMEG(object):
 			cyp2 = yp2+15
 		if yp2>15:
 			cyp2 = yp2-240
+
 		res = cyp2#int.from_bytes(val, byteorder='big')*30/2**16
 		return res
 
 	def vdiv1(self, vold1):
 		"""[0 13]"""
+		self.vdiv1_ = vold1
 		vold1 += 16 
 		"""[16 28]"""
 		print("CH1=")
 		f = [round(vold1), 13]
 		self.ser.write("CH1=".encode('ASCII')+bytearray(f))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def vdiv2(self,vold2):
 		"""[0 13]"""
+		self.vdiv2_ = vold2
 		vold2 += 16 
 		"""[16 28]"""
 		print("CH2=")
 		f = [round(vold2), 13]
 		self.ser.write("CH2=".encode('ASCII')+bytearray(f))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def tdiv(self,timed):
 		"""[0 25]"""
+		self.tdiv_ = timed
 		timed += 1 
 		"""[16 28]"""
 		print("TBA=")
 		h = [round(timed), 13]
 		self.ser.write("TBA=".encode('ASCII')+bytearray(h))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def wtwf1(self):
@@ -146,50 +195,34 @@ class HAMEG(object):
 	def dig2sec(self, dig,tdiv,bit=2048,div=10):
 		return dig/bit*div*tdiv
 
-#r = wtwf1(ser)
-#print(r)
-
-
-
-	def rdwf1(self):
+	def rdwf1(self,offset=b'\x00\x00',max_len=b'\x00\x08'):
 		#print("RDWF1=")
 		#i=bytearray([16,13])
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = offset + max_len+bytearray([13])
+		print(j)
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM1=".encode('ASCII')+j)
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		length = int.from_bytes(j[2:4],byteorder='little')+j[4]
+		j1 = self.ser.read(length)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM1=".encode('ASCII')+j)
-			f.write(j1)
 		return j1
 
 
-	def rdwf2(self):
-		#print("RDWF2=")
-		#i=bytearray([16,13])	
+	def rdwf2(self,offset=b'\x00\x00',max_len=b'\x00\x08'):
+		#print("RDWF1=")
+		#i=bytearray([16,13])
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = offset + max_len+bytearray([13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM2=".encode('ASCII')+j)
-		#j1 = self.ser.read(self.ser.inWaiting())
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		length = int.from_bytes(j[2:4],byteorder='little')+j[4]
+		j1 = self.ser.read(length)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM2=".encode('ASCII')+j)
-			f.write(j1)
-			
 		return j1
 
 	def trgval(self):
@@ -212,6 +245,7 @@ class HAMEG(object):
 		r = self.ser.read(5)
 		val = r.split(b'CH1:')[-1]
 		res = int.from_bytes(val, byteorder='big') - 16
+		self.vdiv1_ = res
 		return res
 
 	def get_vdiv2(self):
@@ -223,6 +257,7 @@ class HAMEG(object):
 		r = self.ser.read(5)
 		val = r.split(b'CH2:')[-1]
 		res = int.from_bytes(val, byteorder='big') -16
+		self.vdiv2_ = res
 		return res
 
 	def get_tdiv(self):
@@ -234,6 +269,7 @@ class HAMEG(object):
 		r = self.ser.read(5)
 		val = r.split(b'TBA:')[-1]
 		res = int.from_bytes(val, byteorder='big')-1
+		self.tdiv_ = res
 		return res
 
 if __name__ == "__main__":
@@ -264,11 +300,11 @@ if __name__ == "__main__":
 	r = hameg.ypos2(15)
 	print(r)
 
-	res1 = hameg.rdwf1()
+	res1 = hameg.CH1WF#hameg.rdwf1()
 	print(res1)
 	k1 = [int(i) for i in res1[50:]]
 
-	res2 = hameg.rdwf2()
+	res2 = hameg.CH1WF#hameg.rdwf2()
 	print(res2)
 	k2 = [int(i) for i in res2[50:]]
 

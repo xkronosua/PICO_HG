@@ -100,7 +100,7 @@ def peak2peak(ref,signal,smooth_ref=3,mean_calc=np.median, ref_mode='triangle'):
 	return res,HIGH,LOW,STD,f,duty_cycle
 
 
-class nanoScat_PD(QtGui.QMainWindow):
+class PICO_HG(QtGui.QMainWindow):
 	ui = None
 	stepperCOMPort = None
 	ATrtAddr = 255
@@ -134,9 +134,10 @@ class nanoScat_PD(QtGui.QMainWindow):
 	lastDivChange = time.time()
 	oscilloLastMaster = None
 	oscilloLastIndex = [-1,-1]
-
+	oscilloSleep = False
 	SM_position = [0,0]
-
+	serOscilloThread = None
+	oscilloRefreshPlot = False
 	#et = ET1255()
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -276,11 +277,11 @@ class nanoScat_PD(QtGui.QMainWindow):
 		
 		#self.osc_pw.showAxis('bottom', False)
 		self.osc_pw.setYRange(0, 256)
-		self.osc_pw.setXRange(0, 2048)
+		self.osc_pw.setXRange(0, 256)
 		self.osc_pw.setMaximumWidth(300)
-		lr = pg.LinearRegionItem([1500,1800])
-		lr.setZValue(-10)
-		self.osc_pw.addItem(lr)
+		self.lr = pg.LinearRegionItem([20,200])
+		self.lr.setZValue(-10)
+		self.osc_pw.addItem(self.lr)
 		#def updatePlot():
 		#	b = data2[int(lr.getRegion()[0]):int(lr.getRegion()[1])]
 		#	integr=np.trapz(b-np.median(data2),dx=dx)
@@ -306,8 +307,8 @@ class nanoScat_PD(QtGui.QMainWindow):
 
 		self.pw.setLabel('left', 'Signal', units='arb. un.')
 		self.pw.setLabel('bottom', 'position', units='deg.')
-		self.pw.setXRange(0, 360)
-		self.pw.setYRange(0, 1e10)
+		#self.pw.setXRange(0, 360)
+		#self.pw.setYRange(0, 1e10)
 		#self.pw2.setMaximumHeight(300)
 
 	def setStepperParam(self):
@@ -527,7 +528,7 @@ class nanoScat_PD(QtGui.QMainWindow):
 		if state:
 			self.calibrTimer.start(self.ui.plotPeriod.value())
 			
-			direction = 1 if self.ui.measurementDirCW.isEnabled() else -1
+			direction = 1 if self.ui.measurementDirCW.isChecked() else -1
 			self.line0.setData(x=[],y=[])
 			self.line1.setData(x=[],y=[])
 			self.line2.setData(x=[],y=[])
@@ -568,7 +569,7 @@ class nanoScat_PD(QtGui.QMainWindow):
 
 	def startContMeas(self, state):
 		if state:
-			self.angleUpdateTimer.stop()
+			#self.angleUpdateTimer.stop()
 
 			with open(self.ui.saveToPath.text(), 'a') as f:
 				f.write("\n#$Filter:"+self.getCurrentFilter()[0]+"\n")
@@ -580,22 +581,27 @@ class nanoScat_PD(QtGui.QMainWindow):
 				f.write("#$WAVELENGTH:"+self.config['GLOBAL']['wavelength'].replace('\n','\t')+'\n')
 				f.write("#$OBJECT:"+self.config['GLOBAL']['object'].replace('\n','\t')+'\n')
 
-				f.write("angle\tref\tsignal\tsignal_std\tfilter\tTime\tfreq\tduty_cycle\n")
+				f.write("position\tref\tsignal\tTime\n")
 			
 			self.measTimer.start(self.ui.plotPeriod.value())
 			
-			direction = 1 if self.ui.measurementDirCW.isEnabled() else -1
-			if direction == 1:
-				self.CWMoveToStop()
-			else:
-				self.CCWMoveToStop()
+			direction = 1 if self.ui.measurementDirCW.isChecked() else -1
+			if self.ui.measurementMode.currentText() == 'EndStop':
+				if direction == 1:
+					self.SM1_left2end()
+				else:
+					self.SM1_right2end()
+			elif self.ui.measurementMode.currentText() == 'smallStep':
+				#self.oscilloSleep = True
+				self.SMD.SMDSleep = True
 
 			self.line0.setData(x=[],y=[])
 			self.line1.setData(x=[],y=[])
 			
+			
 		else:
 
-			self.stepperStop()
+			self.SM1_stop()
 			#et.ET_stopStrobData()
 			#try:
 			
@@ -603,8 +609,12 @@ class nanoScat_PD(QtGui.QMainWindow):
 			#except:
 			#   print('Err')
 			self.measTimer.stop()
+			if self.ui.measurementMode.currentText() == 'smallStep':
+				#self.oscilloSleep = False
+				self.SMD.SMDSleep = False
+
 			#self.openAngleSensorPort(True)
-			self.angleUpdateTimer.start()
+			#self.angleUpdateTimer.start()
 			self.calibrData=np.array([])
 			#data = np.loadtxt(self.ui.saveToPath.text(),comments='#')
 			#self.line2.setData(x=data[:,4], y=data[:,1])
@@ -615,37 +625,52 @@ class nanoScat_PD(QtGui.QMainWindow):
 		r=[]
 		#chanels=[0,1,2]
 		############################################################################
-		r = self.oscilloGetData()
-		y0 = r[1]
-		y1 = r[0]
-		y1_std = r[2]
-
-		name,tmp_filt,index = self.getCurrentFilter()
-		print('Filter:',name,float(tmp_filt),index)
-		info = self.getNanoScatInfo(['angle', 'FW'])
-		angle = float(self.ui.currentAngle.text())#info['angle']
-		filt = info['FW']
-		freq = float(self.ui.oscilloFreq.text())
-		duty_cycle = float(self.ui.duty_cycle.text())
+		#r = self.oscilloGetData()
+		if self.ui.measurementMode.currentText() == 'EndStop':
+			pass
+		else:
+			self.measTimer.stop()
+			self.SMD.SMDSleep = True
+			#r = self.oscilloGetData()
+			
+			direction = 1 if self.ui.measurementDirCW.isChecked() else -1
+			print(self.ui.measurementDirCW.isChecked())
+			if direction == 1:
+				self.SM1_stepRight()
+			else:
+				self.SM1_stepLeft()
+			self.measTimer.start(self.ui.plotPeriod.value())
+			self.SMD.SMDSleep = False
+		y0 = float(self.ui.CH2Val.text())
+		y1 = float(self.ui.CH1Val.text())
+		#name,tmp_filt,index = self.getCurrentFilter()
+		#print('Filter:',name,float(tmp_filt),index)
+		#info = self.getNanoScatInfo(['angle', 'FW'])
+		#angle = float(self.ui.currentAngle.text())#info['angle']
+		#filt = info['FW']
+		#freq = float(self.ui.oscilloFreq.text())
+		#duty_cycle = float(self.ui.duty_cycle.text())
 		#try:
 			#self.currentAngle = angle#et.getAngle()
 		#except:
 		#   pass
-		print("angle", angle)
+		#print("angle", angle)
 		#self.ui.currentAngle.setText(str(self.currentAngle))
 
-		x = angle
+		x = float(self.ui.SM1_position.text())
 		
-
+		out = [x,y0,y1,time.time()]
 		with open(self.ui.saveToPath.text(), 'a') as f:
-				f.write(str(x)+"\t"+str(y0)+"\t"+str(y1) + "\t"+ str(y1_std)+'\t' + str(filt)+"\t"+str(time.time())+"\t"+str(freq)+"\t"+str(duty_cycle) +"\n")
-
+				for i in out:
+					f.write(str(i)+"\t")
+				f.write("\n")
+				
 		#print(self.measData)
 		if len(self.measData)>0:
 			
-			self.measData = np.vstack((self.measData,[x,y0,y1/float(tmp_filt)]))
+			self.measData = np.vstack((self.measData,[x,y0,y1]))
 		else:
-			self.measData = np.array([x,y0,y1/float(tmp_filt)])
+			self.measData = np.array([x,y0,y1])
 		data = self.measData
 		#print(data)
 
@@ -663,24 +688,6 @@ class nanoScat_PD(QtGui.QMainWindow):
 
 	def openAngleSensorPort(self,state):
 		if state:
-			'''
-			portNumber = self.ui.angleSensorPort.value()
-			dev = serial.tools.list_ports.comports()
-			print(dev)
-			dev_list = []
-			for d in dev:
-				dev_list.append(d)
-				
-				try:
-					com, info = dev_list[-1][0], dev_list[-1][2]
-					m = re.search('1A86:7523',info)
-					print(m,info)
-					if m.group(0) == '1A86:7523':
-						print(info,com)
-						portNumber = int(com[3:])
-						self.ui.angleSensorPort.setValue(portNumber)
-				except: pass
-			'''
 			
 			print(">>>>>>open")
 			#et.openSerialPort('COM'+str(self.ui.angleSensorPort.value()))
@@ -800,14 +807,6 @@ class nanoScat_PD(QtGui.QMainWindow):
 
 	def setLaserFreq(self, value):
 		print('SetLaserFreq:')
-		#if not self.angleSensorSerial.inWaiting():
-		
-		#   self.angleSensorSerial = serial.Serial()
-		#   self.angleSensorSerial.port = 'COM'+str(self.ui.angleSensorPort.value())
-		#   self.angleSensorSerial.baudrate = 19200
-		#   self.angleSensorSerial.timeout = 1
-		#   self.angleSensorSerial.setDTR(False)
-		#   self.angleSensorSerial.open()
 		self.angleSensorSerial.write(b'f'+str(value).encode('ascii')+b'\n')
 
 	def closeEvent(self, event):
@@ -852,11 +851,38 @@ class nanoScat_PD(QtGui.QMainWindow):
 			self.ui.oscilloTdiv.setCurrentIndex(td)
 			
 			self.oscReadTimer.start(1000)
+			
+			self.oscilloConnected = True
+			self.oscilloStarted = False
+			self.oscilloSleep = False
 
+			
+			def read_from_CH():
+				while not self.oscilloStarted:
+					self.oscilloStarted = True
+					while self.oscilloConnected:
+						if not self.oscilloSleep:
+							try:
+								#print('$'*100)
+								self.oscilloGetData()
+
+								time.sleep(0.1)
+								#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
+								#print("@"*10,state,"@"*10)
+								#self.handle_data(data)
+							except serial.serialutil.SerialException:
+								print('----------')
+			self.serOscilloThread = threading.Thread(target=read_from_CH)
+			self.serOscilloThread.start()
+			#return self.ser.isOpen()
 		else:
+			self.oscilloConnected = False	
+			#self.serOscilloThread.cancel()
+			self.oscilloStarted = False
 			self.oscReadTimer.stop()
 			self.oscillo.disconnect()
 			self.oscillo.close()
+			self.oscilloSleep = True
 
 	def oscilloGetData(self):
 		div = ( 0.001,0.002,0.005,
@@ -872,115 +898,44 @@ class nanoScat_PD(QtGui.QMainWindow):
 		tdiv_val = float(tdiv_val)*scales[t_order]
 
 		res1 = self.oscillo.rdwf1()
-		sig = np.array([int(i) for i in res1[50:]])
+		sig = np.array([int(i) for i in res1])
 		self.line2.setData(x=np.arange(len(sig)),y=sig)
-		index1 = self.ui.oscilloVdiv1.currentIndex()
+		vdiv1 = self.ui.oscilloVdiv1.currentIndex()
 		
 
 		res2 = self.oscillo.rdwf2()
-		ref = np.array([int(i) for i in res2[50:]])
+		ref = np.array([int(i) for i in res2])
 		self.line3.setData(x=np.arange(len(ref)),y=ref)
-		index2 = self.ui.oscilloVdiv2.currentIndex()
+		vdiv2 = self.ui.oscilloVdiv2.currentIndex()
 		
+		dx=(tdiv_val*10)/2048
 		
-		Vpp1,HIGH,LOW,STD,f,duty_cycle = peak2peak(ref,sig,ref_mode='triangle')
+		b = ref[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
+		Vpp2=np.trapz(b-np.mean(ref[self.lr.getRegion()[1]:]),dx=dx)
 		
-		frequency = 1/(0.1/2048*10/f)
-		self.ui.oscilloFreq.setText(str(frequency))
-		self.ui.duty_cycle.setText(str(duty_cycle))
+		b = sig[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
+		Vpp1=np.trapz(b-np.mean(sig[self.lr.getRegion()[1]:]),dx=dx)
+    	
 		
-		val1 = self.oscillo.dig2Volts(Vpp1, div[index1])#(Vpp1)/256*(div[index1]*8)*1.333333
-		STD1 = self.oscillo.dig2Volts(STD, div[index1])#(STD)/256*(div[index1]*8)*1.333333 
+		val1 = self.oscillo.dig2Volts(Vpp1, div[vdiv1])#(Vpp1)/256*(div[index1]*8)*1.333333
+		STD1 = 0
 		self.ui.CH1Val.setText(str(val1))
-		self.ui.CH1Val_std.setText(str(STD1))
 
 
-		ref = medfilt(ref,5)
-		Vpp2 = ref.max()-ref.min()
-		print("Vpp1:",Vpp1,"Vpp2:",Vpp2)
-		val2 = self.oscillo.dig2Volts(Vpp2, div[index2])#(Vpp2)/256*(div[index2]*8)*1.333333
+		val2 = self.oscillo.dig2Volts(Vpp2, div[vdiv2])#(Vpp2)/256*(div[index2]*8)*1.333333
 		self.ui.CH2Val.setText(str(val2))
 
-		'''
-		if self.ui.oscilloAuto.isChecked() and (time.time()-self.lastDivChange)>1 :
-			self.lastDivChange = time.time()
-			if sig.min()<20:
-				index1 = self.ui.oscilloVdiv1.currentIndex()
-				if self.oscilloLastMaster == 'HAMEG':
-					#if self.oscilloLastIndex[0] == index1+1:
-					#   self.oscilloLastMaster = 'FM' 
-					if index1<12:
-						self.oscilloLastIndex[0] = index1
-						self.oscillo.vdiv1(index1+1)
-						self.ui.oscilloVdiv1.setCurrentIndex(index1+1)
-						#self.oscilloAutoSet()
-						#self.oscillo.tdiv(17)
-						#self.ui.oscilloTdiv.setCurrentIndex(17)
-					#else:
-					#   self.oscilloLastMaster = 'FM'
-				else:
-
-					#self.nextFilter()
-					#self.oscilloAutoSet()
-					#self.oscillo.tdiv(17)
-					#self.ui.oscilloTdiv.setCurrentIndex(17)
-					self.oscilloLastIndex == 'HAMEG'
-
-			elif sig.max()>230:
-				index1 = self.ui.oscilloVdiv1.currentIndex()
-				if self.oscilloLastMaster == 'HAMEG':
-					#if self.oscilloLastIndex[0] == index1+1:
-					#   self.oscilloLastMaster = 'FM' 
-					if index1>1:
-						self.oscilloLastIndex[0] = index1
-						self.oscillo.vdiv1(index1-1)
-						self.ui.oscilloVdiv1.setCurrentIndex(index1-1)
-						
-						#self.oscilloAutoSet()
-						#self.oscillo.tdiv(17)
-						#self.ui.oscilloTdiv.setCurrentIndex(17)
-					#else:
-					#   self.oscilloLastMaster = 'FM'
-				else:
-
-					#self.nextFilter()
-					#self.oscilloAutoSet()
-					#self.oscillo.tdiv(17)
-					#self.ui.oscilloTdiv.setCurrentIndex(17)
-					self.oscilloLastIndex == 'HAMEG'
-
-			elif abs(Vpp1) < 20:
-				index1 = self.ui.oscilloVdiv1.currentIndex()
-				if self.oscilloLastMaster == 'HAMEG':
-					#if self.oscilloLastIndex[0] == index1-1:
-					#   self.oscilloLastMaster = 'FM'
-					if index1>1:
-						self.oscilloLastIndex[0] = index1
-						self.ui.oscilloVdiv1.setCurrentIndex(index1-1)
-						self.oscillo.vdiv1(index1-1)
-						#self.oscilloAutoSet()
-						#self.oscillo.tdiv(17)
-						#self.ui.oscilloTdiv.setCurrentIndex(17)
-					#else:
-					#   self.oscilloLastMaster = 'FM'
-				else:
-					#self.prevFilter()
-					#self.oscilloAutoSet()
-					#self.oscillo.tdiv(17)
-					#self.ui.oscilloTdiv.setCurrentIndex(17)
-					self.oscilloLastIndex == 'HAMEG'
-			
-			
-			print(Vpp1, self.oscilloLastMaster)
-		'''
+		
 		return [val1,val2,STD1]
 	
 
 	def onOscReadTimer(self):
-		res = self.oscilloGetData()
-		print(res)
+		pass
+		#res = self.oscilloGetData()
+		#print(res)
 
 	def oscilloAutoSet(self):
+		self.oscilloSleep = True
 		r = self.oscillo.autoset()
 		print(r)
 		ch1_v = self.oscillo.get_vdiv1()
@@ -1000,8 +955,10 @@ class nanoScat_PD(QtGui.QMainWindow):
 		td = self.oscillo.get_tdiv()
 		print(td)
 		self.ui.oscilloTdiv.setCurrentIndex(td)
-
+		self.oscilloSleep = False
+		
 	def oscilloSet(self):
+		self.oscilloSleep = True
 		v1 = self.ui.oscilloVdiv1.currentIndex()
 		r = self.oscillo.vdiv1(v1)
 		print(r)
@@ -1020,6 +977,8 @@ class nanoScat_PD(QtGui.QMainWindow):
 		y2 = self.ui.oscilloYpos2.value()
 		r = self.oscillo.ypos2(y2)
 		print(r)
+		self.oscilloSleep = False
+		
 	def SMD_connect(self,state):
 		if state:
 			port = list(list_ports.grep("0403:6001"))[0][0]
@@ -1028,10 +987,10 @@ class nanoScat_PD(QtGui.QMainWindow):
 			print(self.SMD.str2hex(b"\n\r"))
 			self.SMD.eSetTactFreq(1,160)
 			self.SMD.eClearStep(3)
-			self.SMD.eSetMulty(1,1)
+			self.SMD.eSetMulty(1,3)
 			self.SMD.eWriteMarchIHoldICode(1,1,1)
 			self.SMD.eSetPhaseMode(1,10)
-			self.SMD_endstopsTimer.start(1000)
+			self.SMD_endstopsTimer.start(1100)
 		
 		else:
 			self.SMD.close()
@@ -1041,21 +1000,25 @@ class nanoScat_PD(QtGui.QMainWindow):
 		print('State:',state)
 		
 		self.ui.SM1_leftEndstop.setChecked(not  state['SM1_end1'])
-		self.ui.SM1_rightEndstop.setChecked(not state['SM1_end1'])
+		self.ui.SM1_rightEndstop.setChecked(not state['SM1_end2'])
+		self.ui.SM1_stepsCounter.setText(str(state['SM1_steps']))
 
 	def SM1_stop(self):
+		self.SMDSleep = True
 		self.SMD.eStop(1)
 	def SM2_stop(self):
 		self.SMD.eStop(2)
 	def SMs_stop(self):
+		self.SMDSleep = True
 		self.SMD.eStop(3)
 	
 	def SM1_stepLeft(self):
+		#self.SMDSleep = True
 		calibr = float(self.config['GLOBAL']['SM1_calibr_coef'])
 		real_step = self.ui.SM1_step.value()
 		steps = round(real_step*calibr)
 		self.SMD.makeStepCW(1,steps,True)
-
+		#self.SMDSleep = False
 		state=self.SMD.SM_state['SMs_state']
 		#while state!=0:
 		#	print('State:',self.SMD.SM_state)
@@ -1063,11 +1026,12 @@ class nanoScat_PD(QtGui.QMainWindow):
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 	
 	def SM1_stepRight(self):
+		#self.SMDSleep = True
 		calibr = float(self.config['GLOBAL']['SM1_calibr_coef'])
 		real_step = self.ui.SM1_step.value()
 		steps = round(real_step*calibr)
 		self.SMD.makeStepCCW(1,steps,True)
-
+		#self.SMDSleep = False
 		state=self.SMD.SM_state['SMs_state']
 		#while state!=0:
 		#print('State:',self.SMD.SM_state)
@@ -1075,11 +1039,13 @@ class nanoScat_PD(QtGui.QMainWindow):
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 
 	def SM1_left2end(self):
+		self.SMDSleep = True
 		calibr = float(self.config['GLOBAL']['SM1_calibr_coef'])
 		real_step = self.ui.SM1_step.value()
 		steps = round(real_step*calibr)
+		
 		self.SMD.moveCW(1,steps)
-
+		self.SMDSleep = False
 		#state=self.SMD.eGetState()
 		#f = lambda : e.eStop()
 		#while state[1][0]!=0:
@@ -1093,8 +1059,9 @@ class nanoScat_PD(QtGui.QMainWindow):
 		calibr = float(self.config['GLOBAL']['SM1_calibr_coef'])
 		real_step = self.ui.SM1_step.value()
 		steps = round(real_step*calibr)
+		self.SMDSleep = True
 		self.SMD.moveCCW(1,steps)
-
+		self.SMDSleep = False
 		#state=self.SMD.eGetState()
 		#while state[1][0]!=0:
 		#	state=self.SMD.eGetState()
@@ -1104,7 +1071,9 @@ class nanoScat_PD(QtGui.QMainWindow):
 	def SM1_reset(self):
 		self.SM_position[0] = 0
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
+		self.SMDSleep = True
 		self.SMD.eClearStep(3)
+		self.SMDSleep = False
 	
 	def SM1_moveTo(self):
 		dlg =  QtGui.QInputDialog(self)
@@ -1137,17 +1106,20 @@ class nanoScat_PD(QtGui.QMainWindow):
 				self.SM_position[0] -= real_step
 			self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 	def SM1_speed(self,val):
-		if(val<255):
-			self.SMD.eSetTactFreq(1,val)
-		elif(val>255):
-			self.SMD.eSetMulty(1,2)
-			self.SMD.eSetTactFreq(1,val-255)
+		#if(val<255):
+		self.ui.SM1_speed_val.setValue(val)
+		self.SMD.eSetTactFreq(1,val)
+		#elif(val>255):
+		#	self.SMD.eSetMulty(1,2)
+		#	self.SMD.eSetTactFreq(1,val-255)
 		self.SMD.eSetParams(stepper=1,steps=0,prev=True)
 
 	def uiConnect(self):
 
 		self.ui.SMD_connect.toggled[bool].connect(self.SMD_connect)
 		self.ui.SM1_speed.valueChanged[int].connect(self.SM1_speed)
+
+		self.ui.SM1_speed_val.valueChanged[int].connect(self.ui.SM1_speed.setValue)
 		self.ui.SM1_stop.clicked.connect(self.SM1_stop)
 		self.ui.SM1_stepLeft.clicked.connect(self.SM1_stepLeft)
 		self.ui.SM1_stepRight.clicked.connect(self.SM1_stepRight)
@@ -1157,8 +1129,8 @@ class nanoScat_PD(QtGui.QMainWindow):
 		self.ui.SM1_absMove.clicked.connect(self.SM1_moveTo)
 		#self.ui.btnExit.clicked.connect(self.closeAll)
 		#self.ui.actionExit.triggered.connect(self2.closeAll)
-		self.ui.measurementDirCW.clicked.connect(lambda state: (self.ui.measurementDirCCW.setChecked(False), self.ui.measurementDirCW.setEnabled(False),self.ui.measurementDirCCW.setEnabled(True)))
-		self.ui.measurementDirCCW.clicked.connect(lambda state: (self.ui.measurementDirCW.setChecked(False), self.ui.measurementDirCCW.setEnabled(False),self.ui.measurementDirCW.setEnabled(True)))
+		#self.ui.measurementDirCW.clicked.connect(lambda state: (self.ui.measurementDirCCW.setChecked(False), self.ui.measurementDirCW.setEnabled(False),self.ui.measurementDirCCW.setEnabled(True)))
+		#self.ui.measurementDirCCW.clicked.connect(lambda state: (self.ui.measurementDirCW.setChecked(False), self.ui.measurementDirCCW.setEnabled(False),self.ui.measurementDirCW.setEnabled(True)))
 
 		self.ui.startCalibr.toggled[bool].connect(self.startCalibr)
 		self.ui.startMeasurement.toggled[bool].connect(self.startContMeas)
@@ -1225,7 +1197,7 @@ class nanoScat_PD(QtGui.QMainWindow):
 if __name__ == "__main__":
 	signal.signal(signal.SIGINT, sigint_handler)
 	app = QtGui.QApplication(sys.argv)
-	myWindow = nanoScat_PD(None)
+	myWindow = PICO_HG(None)
 	app.exec_()
 	#SMD_CloseComPort()
 	print(":)")

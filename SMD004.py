@@ -15,6 +15,8 @@ class SMD004():
 	serThread = None
 	SM_state = {}
 	started = False
+	SM1_totalSteps = 0
+	SM1_prev_steps = 0
 	def __init__(self, parent=None):
 		self.eInit()
 		ser = None
@@ -29,7 +31,7 @@ class SMD004():
 		#print(self.write_(b"\xFF\x08\x02\x01\x01"))
 
 	def eOpenCOMPort(self,port=1):
-		self.ser = serial.Serial(port, baudrate=19200, parity=serial.PARITY_ODD, timeout=0.05, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
+		self.ser = serial.Serial(port, baudrate=19200, parity=serial.PARITY_ODD, timeout=0.1, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
 		self.ser.flush()
 		self.ser.flushInput()
 		self.ser.flushOutput()
@@ -37,6 +39,7 @@ class SMD004():
 		r = self.ser.readline()
 
 		self.connected = True
+		self.SMDSleep = False
 		self.serThread = threading.Timer(1,self.read_from_port)
 		self.serThread.start()
 		return("Info:",r)
@@ -45,15 +48,16 @@ class SMD004():
 		while not self.started:
 			self.started = True
 			while self.isConnected():
-				try:
-					#print('$'*100)
-					state=self.eGetState()
-					time.sleep(1)
-					#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
-					#print("@"*10,state,"@"*10)
-					#self.handle_data(reading)
-				except serial.serialutil.SerialException:
-					print('----------')
+				if not self.SMDSleep:
+					try:
+						#print('$'*100)
+						state=self.eGetState()
+						time.sleep(1)
+						#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
+						#print("@"*10,state,"@"*10)
+						#self.handle_data(reading)
+					except serial.serialutil.SerialException:
+						print('----------')
 
 	def close(self):
 		self.connected = False	
@@ -62,6 +66,7 @@ class SMD004():
 
 		self.ser.close()
 		self.started = False
+		self.SMDSleep = True
 	def eStop(self, stepper=3):
 		u'''
 		Назначение: стоп вращения двигателя.
@@ -281,6 +286,18 @@ class SMD004():
 				endstops = [int(i) for i in bin(endstops)[2:6]][::-1]
 				#time.sleep(0.5)
 				#r = self.ser.readline()
+				SM1_diff = SM1_steps - self.SM1_prev_steps
+				if SM1_diff<-60000:
+					self.SM1_totalSteps += 32767
+				elif SM1_diff>60000:
+					self.SM1_totalSteps -= 32767
+				elif SM1_diff>0:
+					self.SM1_totalSteps += SM1_diff
+				elif SM1_diff<0:
+					self.SM1_totalSteps -= SM1_diff
+				self.SM_prev_steps = SM1_steps
+				#print("|"*10, self.SM1_totalSteps)
+				self.SM1_totalSteps = SM1_steps
 				if len(endstops)==4:
 					self.SM_state = {'SMs_state':SMs_state,	'SM1_steps':SM1_steps, 'SM1_mode':SM1_mode,
 															'SM2_steps':SM2_steps, 'SM2_mode':SM2_mode,
@@ -297,57 +314,39 @@ class SMD004():
 			s = data
 			s = self.cSum(s)
 		
-			# s = s.replace('\x','')
-			
-			#print( data, s, self.str2hex(s),type(s), '='*10)
-			#s = bytes(s, 'utf-8')
-			#self.ser.baudrate = 19200
-			#self.ser.parity = serial.PARITY_MARK
-			#self.ser.bytesize = serial.EIGHTBITS
-			#self.ser.stopbits = serial.STOPBITS_ONE
-			self.ser.write(s[:2])
-			#print(self.str2hex(s[:2]))
-			
-			#self.ser.baudrate = 19200
-			#self.ser.parity = serial.PARITY_SPACE
-			#self.ser.bytesize = serial.EIGHTBITS
-			#self.ser.stopbits = serial.STOPBITS_ONE
-			self.ser.write(s[2:])
-			#print(self.str2hex(s[2:]))
-			#self.ser.read() 
-			time.sleep(sleep)
-			r = self.ser.readline()
-			print(">"*10, r)
+			self.ser.write(s)
+			#self.ser.write(s[:2])
+			#self.ser.write(s[2:])
+			for i in range(10):
+				try:
+					r = self.ser.readline()#bytesToRead)
+					break
+				except:
+					pass
+			#print(">"*10, r)
 			return r
 	def write_(self, data,sleep=0.01):
 		if self.isConnected():
 			s = data
 			s = self.cSum(s,bytesA=True)
-		
+			
 			# s = s.replace('\x','')
 			
 			#print( data, s, self.str2hex(s),type(s), '='*10)
 			#s = bytes(s, 'utf-8')
 			#self.ser.baudrate = 19200
 			self.ser.parity = serial.PARITY_MARK
-			#self.ser.bytesize = serial.EIGHTBITS
-			#self.ser.stopbits = serial.STOPBITS_ONE
-			self.ser.write(s[:2])
-			#print(self.str2hex(s[:2]))
-			
-			#self.ser.baudrate = 19200
-			#self.ser.parity = serial.PARITY_SPACE
-			#self.ser.bytesize = serial.EIGHTBITS
-			#self.ser.stopbits = serial.STOPBITS_ONE
-			self.ser.write(s[2:-2])
-			#print(self.str2hex(s[2:-2]))
-			self.ser.write(s[-2:])
-			#print(self.str2hex(s[-2:]))
-
-			#self.ser.read() 
-			time.sleep(sleep)
-			r = self.ser.readline()
-			print(">"*10, r)
+			self.ser.write(s)
+			#self.ser.write(s[:2])
+			#self.ser.write(s[2:-2])
+			#self.ser.write(s[-2:])
+			for i in range(10):
+				try:
+					r = self.ser.readline()#bytesToRead)
+					break
+				except:
+					pass
+			#print(">"*10, r)
 			return r
 	def int2B(self, b):
 		return (b&0xff, (b&0xff00)>>8)
@@ -386,7 +385,7 @@ if __name__ == "__main__":
 		#time.sleep(2)
 		#e.eStop()
 		e.eClearStep(3)
-		e.eSetTactFreq(1,160)
+		e.eSetTactFreq(1,60)
 		e.eSetMulty(1,1)
 
 		
@@ -404,9 +403,9 @@ if __name__ == "__main__":
 		#print('+'*10,e.isConnected())
 		print('-'*50)
 		e.eWriteMarchIHoldICode(1,1,0)
-		e.eSetPhaseMode(1,1)
-		e.makeStepCW(1,2000,True)
-		#e.moveCW(1,50)
+		e.eSetPhaseMode(1,10)
+		#e.makeStepCW(1,2000,True)
+		e.moveCW(1,50)
 		#time.sleep(1)
 		
 		#state=e.eGetState()
@@ -427,7 +426,7 @@ if __name__ == "__main__":
 	except:
 		traceback.print_exc()
 		#e.ser.close()	
-	time.sleep(5)
+	time.sleep(40)
 	e.eStop()
 	e.close()
 	print(e.isConnected())

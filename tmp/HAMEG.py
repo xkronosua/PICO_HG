@@ -16,13 +16,13 @@ class HAMEG(object):
 		parity='N',
 		stopbits=serial.STOPBITS_TWO,
 		bytesize=8,
-		timeout=0.1
+		timeout=3
 		)
 		return self.ser.isOpen()
 
 	def disconnect(self):
 		self.ser.write("RM0".encode('ASCII')+bytearray([13,10]))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def close(self):
@@ -43,7 +43,7 @@ class HAMEG(object):
 	def autoset(self):
 		print("AUTOSET")
 		self.ser.write("AUTOSET".encode('ASCII')+bytearray([13, 10]))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 
@@ -107,7 +107,7 @@ class HAMEG(object):
 		print("CH1=")
 		f = [round(vold1), 13]
 		self.ser.write("CH1=".encode('ASCII')+bytearray(f))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def vdiv2(self,vold2):
@@ -117,7 +117,7 @@ class HAMEG(object):
 		print("CH2=")
 		f = [round(vold2), 13]
 		self.ser.write("CH2=".encode('ASCII')+bytearray(f))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def tdiv(self,timed):
@@ -127,7 +127,7 @@ class HAMEG(object):
 		print("TBA=")
 		h = [round(timed), 13]
 		self.ser.write("TBA=".encode('ASCII')+bytearray(h))
-		r = self.ser.readline()#(3)
+		r = self.ser.read(3)
 		return r
 
 	def wtwf1(self):
@@ -156,40 +156,26 @@ class HAMEG(object):
 		#i=bytearray([16,13])
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,4,0,2,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM1=".encode('ASCII')+j)
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		j1 = self.ser.read(1035	)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM1=".encode('ASCII')+j)
-			f.write(j1)
 		return j1
 
 
 	def rdwf2(self):
 		#print("RDWF2=")
-		#i=bytearray([16,13])	
+		i=bytearray([16,13])	
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,4,0,2,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM2=".encode('ASCII')+j)
-		#j1 = self.ser.read(self.ser.inWaiting())
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		j1 = self.ser.read(1035)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM2=".encode('ASCII')+j)
-			f.write(j1)
-			
 		return j1
 
 	def trgval(self):

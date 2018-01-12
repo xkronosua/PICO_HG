@@ -1,12 +1,22 @@
+import queue
+import threading
 import time
+import traceback
 import serial
+from serial.tools import list_ports
 
-class HAMEG(object):
+class HAMEG(threading.Thread):
 	
 	ser = None
 	
 	def __init__(self):
-		pass
+		self.data_q = data_q
+		self.error_q = error_q
+		self.lock = threading.Lock()
+		self.alive = threading.Event()
+		self.alive.set()
+		threading.Thread.__init__(self)
+		
 	def connect(self):
 		# configure the serial connections (the parameters differs on the device you are connecting to)
 		self.ser = serial.Serial(
@@ -145,6 +155,22 @@ class HAMEG(object):
 		return dig/bit*div*vdiv
 	def dig2sec(self, dig,tdiv,bit=2048,div=10):
 		return dig/bit*div*tdiv
+	
+	def join(self, timeout=None):
+		self.alive.clear()
+		threading.Thread.join(self, timeout)
+
+	def stop(self):
+		self.alive.clear()
+
+	def lock_readout(self):
+		self.alive.wait()
+		self.lock.acquire()
+
+	def release_readout(self):
+		self.alive.set()
+		self.lock.release()
+		
 
 #r = wtwf1(ser)
 #print(r)
@@ -156,18 +182,13 @@ class HAMEG(object):
 		#i=bytearray([16,13])
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,6,0,1,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM1=".encode('ASCII')+j)
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		#j1 = self.ser.read(self.ser.inWaiting())
+		j1 = self.ser.read(256+13)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM1=".encode('ASCII')+j)
-			f.write(j1)
 		return j1
 
 
@@ -176,20 +197,13 @@ class HAMEG(object):
 		#i=bytearray([16,13])	
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,6,0,1,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM2=".encode('ASCII')+j)
 		#j1 = self.ser.read(self.ser.inWaiting())
-		j1 = self.ser.read(1)
-		time.sleep(0.2)
-		j1 += self.ser.read(self.ser.inWaiting())
-		#j1 = self.ser.read(256+13)
+		j1 = self.ser.read(256+13)
 		#l=0
 		#v = j1[12:267]
-		with open('HAMEG_out.txt','ab') as f:
-			f.write("RDWFM2=".encode('ASCII')+j)
-			f.write(j1)
-			
 		return j1
 
 	def trgval(self):
