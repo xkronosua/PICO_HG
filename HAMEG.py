@@ -151,12 +151,12 @@ class HAMEG(object):
 
 
 
-	def rdwf1(self):
+	def rdwf1(self,shift=5):
 		#print("RDWF1=")
 		#i=bytearray([16,13])
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,shift,0,1,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM1=".encode('ASCII')+j)
 		j1 = self.ser.read(1)
@@ -171,12 +171,12 @@ class HAMEG(object):
 		return j1
 
 
-	def rdwf2(self):
+	def rdwf2(self,shift=5):
 		#print("RDWF2=")
 		#i=bytearray([16,13])	
 		#ser.write("STRMODE=".encode('ASCII')+i)
 		#i1 = ser.read(3)
-		j = bytearray([0,5,0,1,13])
+		j = bytearray([0,shift,0,1,13])
 		#j = b"\x00\x00\x00\x08"
 		self.ser.write("RDWFM2=".encode('ASCII')+j)
 		#j1 = self.ser.read(self.ser.inWaiting())

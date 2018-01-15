@@ -58,8 +58,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>323</width>
-         <height>694</height>
+         <width>400</width>
+         <height>685</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -271,8 +271,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>323</width>
-         <height>694</height>
+         <width>400</width>
+         <height>685</height>
         </rect>
        </property>
        <attribute name="label">
@@ -660,7 +660,7 @@
          <x>0</x>
          <y>0</y>
          <width>400</width>
-         <height>694</height>
+         <height>685</height>
         </rect>
        </property>
        <attribute name="label">
@@ -1475,6 +1475,19 @@
             </property>
            </widget>
           </item>
+          <item row="8" column="1">
+           <widget class="QSpinBox" name="oscilloRWShift">
+            <property name="maximum">
+             <number>8</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1532,7 +1545,9 @@ color: #222222;</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset theme="arrow-left"/>
+           <iconset theme="arrow-left">
+            <normaloff/>
+           </iconset>
           </property>
          </widget>
         </item>
@@ -1542,7 +1557,9 @@ color: #222222;</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset theme="arrow-right"/>
+           <iconset theme="arrow-right">
+            <normaloff/>
+           </iconset>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -1658,7 +1675,7 @@ color: #222222;</string>
      <x>0</x>
      <y>0</y>
      <width>1163</width>
-     <height>30</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFIle">

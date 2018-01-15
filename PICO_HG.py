@@ -570,7 +570,8 @@ class PICO_HG(QtGui.QMainWindow):
 	def startContMeas(self, state):
 		if state:
 			#self.angleUpdateTimer.stop()
-
+			self.oscReadTimer.stop()
+			
 			with open(self.ui.saveToPath.text(), 'a') as f:
 				f.write("\n#$Filter:"+self.getCurrentFilter()[0]+"\n")
 				for row in range(6):
@@ -609,6 +610,7 @@ class PICO_HG(QtGui.QMainWindow):
 			#except:
 			#   print('Err')
 			self.measTimer.stop()
+			self.oscReadTimer.start(self.ui.plotPeriod.value())
 			if self.ui.measurementMode.currentText() == 'smallStep':
 				#self.oscilloSleep = False
 				self.SMD.SMDSleep = False
@@ -622,25 +624,28 @@ class PICO_HG(QtGui.QMainWindow):
 			
 			
 	def onContMeasTimer(self):
+	
 		r=[]
 		#chanels=[0,1,2]
 		############################################################################
 		#r = self.oscilloGetData()
-		if self.ui.measurementMode.currentText() == 'EndStop':
-			pass
+		#if self.ui.measurementMode.currentText() == 'EndStop':
+		#	pass
+		#else:
+		self.measTimer.stop()
+		self.oscilloGetData()
+		self.SMD.SMDSleep = True
+		#r = self.oscilloGetData()
+		
+		direction = 1 if self.ui.measurementDirCW.isChecked() else -1
+		print(self.ui.measurementDirCW.isChecked())
+		if direction == 1:
+			self.SM1_stepRight()
 		else:
-			self.measTimer.stop()
-			self.SMD.SMDSleep = True
-			#r = self.oscilloGetData()
-			
-			direction = 1 if self.ui.measurementDirCW.isChecked() else -1
-			print(self.ui.measurementDirCW.isChecked())
-			if direction == 1:
-				self.SM1_stepRight()
-			else:
-				self.SM1_stepLeft()
-			self.measTimer.start(self.ui.plotPeriod.value())
-			self.SMD.SMDSleep = False
+			self.SM1_stepLeft()
+		
+		self.SMD.SMDSleep = False
+		
 		y0 = float(self.ui.CH2Val.text())
 		y1 = float(self.ui.CH1Val.text())
 		#name,tmp_filt,index = self.getCurrentFilter()
@@ -679,6 +684,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.line1.setData(x=data[:,0], y=data[:,2])
 		#self.updateAngle(x)
 		app.processEvents()  
+		self.measTimer.start(self.ui.plotPeriod.value())
 
 	def saveToBtn(self):
 		filename = self.fileDialog.getSaveFileName(self)
@@ -856,7 +862,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.oscilloStarted = False
 			self.oscilloSleep = False
 
-			
+			'''
 			def read_from_CH():
 				while not self.oscilloStarted:
 					self.oscilloStarted = True
@@ -874,7 +880,9 @@ class PICO_HG(QtGui.QMainWindow):
 								print('----------')
 			self.serOscilloThread = threading.Thread(target=read_from_CH)
 			self.serOscilloThread.start()
+			'''
 			#return self.ser.isOpen()
+			self.oscReadTimer.start(self.ui.plotPeriod.value())
 		else:
 			self.oscilloConnected = False	
 			#self.serOscilloThread.cancel()
@@ -894,16 +902,16 @@ class PICO_HG(QtGui.QMainWindow):
 		print(div_t)
 		tdiv_val, t_order = div_t.split(' ')
 		
-		scales={'ns':1e-9,'mks':1e-3,'ms':1e-3,'s':1}
+		scales={'ns':1e-9,'mks':1e-6,'ms':1e-3,'s':1}
 		tdiv_val = float(tdiv_val)*scales[t_order]
 
-		res1 = self.oscillo.rdwf1()
+		res1 = self.oscillo.rdwf1(shift=self.ui.oscilloRWShift.value())
 		sig = np.array([int(i) for i in res1])
 		self.line2.setData(x=np.arange(len(sig)),y=sig)
 		vdiv1 = self.ui.oscilloVdiv1.currentIndex()
 		
 
-		res2 = self.oscillo.rdwf2()
+		res2 = self.oscillo.rdwf2(shift=self.ui.oscilloRWShift.value())
 		ref = np.array([int(i) for i in res2])
 		self.line3.setData(x=np.arange(len(ref)),y=ref)
 		vdiv2 = self.ui.oscilloVdiv2.currentIndex()
@@ -911,11 +919,27 @@ class PICO_HG(QtGui.QMainWindow):
 		dx=(tdiv_val*10)/2048
 		
 		b = ref[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
-		Vpp2=np.trapz(b-np.mean(ref[self.lr.getRegion()[1]:]),dx=dx)
+		bg=np.hstack((ref[:self.lr.getRegion()[0]],ref[self.lr.getRegion()[1]:]))
+		bg_i = 0
+		for i in range(len(bg)-1):
+			if bg[i]==0 and bg[i+1]==1:
+				bg_i = i+2
+		bg = bg[bg_i:]	
+		
+		Vpp2=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
+		
+			
+		#print("bg>",bg,"<",np.mean(bg), b,len(b), b-np.mean(bg)*np.ones(len(b)))
 		
 		b = sig[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
-		Vpp1=np.trapz(b-np.mean(sig[self.lr.getRegion()[1]:]),dx=dx)
-    	
+		bg=np.hstack((sig[:self.lr.getRegion()[0]],sig[self.lr.getRegion()[1]:]))
+		bg_i = 0
+		for i in range(len(bg)-1):
+			if bg[i]==0 and bg[i+1]==1:
+				bg_i = i+2
+		bg = bg[bg_i:]	
+		
+		Vpp1=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
 		
 		val1 = self.oscillo.dig2Volts(Vpp1, div[vdiv1])#(Vpp1)/256*(div[index1]*8)*1.333333
 		STD1 = 0
@@ -930,9 +954,10 @@ class PICO_HG(QtGui.QMainWindow):
 	
 
 	def onOscReadTimer(self):
-		pass
-		#res = self.oscilloGetData()
-		#print(res)
+		self.oscReadTimer.stop()
+		res = self.oscilloGetData()
+		self.oscReadTimer.start(self.ui.plotPeriod.value())
+		print(res)
 
 	def oscilloAutoSet(self):
 		self.oscilloSleep = True
