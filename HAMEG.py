@@ -165,9 +165,11 @@ class HAMEG(object):
 		#j1 = self.ser.read(256+13)
 		#l=0
 		#v = j1[12:267]
+		'''
 		with open('HAMEG_out.txt','ab') as f:
 			f.write("RDWFM1=".encode('ASCII')+j)
 			f.write(j1)
+		'''
 		return j1
 
 
@@ -186,10 +188,11 @@ class HAMEG(object):
 		#j1 = self.ser.read(256+13)
 		#l=0
 		#v = j1[12:267]
+		'''
 		with open('HAMEG_out.txt','ab') as f:
 			f.write("RDWFM2=".encode('ASCII')+j)
 			f.write(j1)
-			
+		'''	
 		return j1
 
 	def trgval(self):

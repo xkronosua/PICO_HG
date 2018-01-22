@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # _*_ coding: utf-8 _*_
 
 #from ET1255 import *
@@ -33,7 +34,7 @@ import struct
 from datetime import datetime
 
 import SMD004
- 
+import traceback
 
 
 
@@ -568,6 +569,7 @@ class PICO_HG(QtGui.QMainWindow):
 		app.processEvents()  
 
 	def startContMeas(self, state):
+		print("Start_State:",state)
 		if state:
 			#self.angleUpdateTimer.stop()
 			self.oscReadTimer.stop()
@@ -599,7 +601,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.line0.setData(x=[],y=[])
 			self.line1.setData(x=[],y=[])
 			
-			
+			self.ui.startMeasurement.setStyleSheet('background-color:red;')
 		else:
 
 			self.SM1_stop()
@@ -621,10 +623,13 @@ class PICO_HG(QtGui.QMainWindow):
 			#data = np.loadtxt(self.ui.saveToPath.text(),comments='#')
 			#self.line2.setData(x=data[:,4], y=data[:,1])
 			#self.line3.setData(x=data[:,-1], y=data[:,2])
+			self.ui.startMeasurement.setStyleSheet('background-color:green;')
 			
 			
 	def onContMeasTimer(self):
-	
+		if not self.ui.startMeasurement.isChecked():
+			self.measTimer.stop()
+			self.oscReadTimer.start(self.ui.plotPeriod.value())
 		r=[]
 		#chanels=[0,1,2]
 		############################################################################
@@ -634,7 +639,7 @@ class PICO_HG(QtGui.QMainWindow):
 		#else:
 		self.measTimer.stop()
 		self.oscilloGetData()
-		self.SMD.SMDSleep = True
+		#self.SMD.SMDSleep = True
 		#r = self.oscilloGetData()
 		
 		direction = 1 if self.ui.measurementDirCW.isChecked() else -1
@@ -671,20 +676,24 @@ class PICO_HG(QtGui.QMainWindow):
 				f.write("\n")
 				
 		#print(self.measData)
-		if len(self.measData)>0:
+		try:
 			
 			self.measData = np.vstack((self.measData,[x,y0,y1]))
-		else:
+			data = self.measData
+			self.line0.setData(x=data[:,0], y=data[:,1])
+			self.line1.setData(x=data[:,0], y=data[:,2])
+			
+		except:
+			traceback.print_exc()
 			self.measData = np.array([x,y0,y1])
-		data = self.measData
+		
 		#print(data)
 
+		self.measTimer.start(self.ui.plotPeriod.value())
 		
-		self.line0.setData(x=data[:,0], y=data[:,1])
-		self.line1.setData(x=data[:,0], y=data[:,2])
 		#self.updateAngle(x)
 		app.processEvents()  
-		self.measTimer.start(self.ui.plotPeriod.value())
+		
 
 	def saveToBtn(self):
 		filename = self.fileDialog.getSaveFileName(self)
@@ -821,9 +830,16 @@ class PICO_HG(QtGui.QMainWindow):
 			"Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
 		if reply == QtGui.QMessageBox.Yes:
-			self.angleSensorSerial.close()
+			try:
+			
+				self.angleSensorSerial.close()
+			except:
+				pass
 			self.oscillo.disconnect()
+			
 			self.oscillo.close()
+			self.SMD.close()
+			self.SMD_endstopsTimer.stop()
 			event.accept()
 			#self.stopLaserStrob()
 			#self.stopDataBuffering()
@@ -883,6 +899,7 @@ class PICO_HG(QtGui.QMainWindow):
 			'''
 			#return self.ser.isOpen()
 			self.oscReadTimer.start(self.ui.plotPeriod.value())
+			self.ui.oscilloConnect.setStyleSheet('background-color:red;')
 		else:
 			self.oscilloConnected = False	
 			#self.serOscilloThread.cancel()
@@ -891,6 +908,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.oscillo.disconnect()
 			self.oscillo.close()
 			self.oscilloSleep = True
+			self.ui.oscilloConnect.setStyleSheet('background-color:green;')
 
 	def oscilloGetData(self):
 		div = ( 0.001,0.002,0.005,
@@ -1012,14 +1030,17 @@ class PICO_HG(QtGui.QMainWindow):
 			print(self.SMD.str2hex(b"\n\r"))
 			self.SMD.eSetTactFreq(1,160)
 			self.SMD.eClearStep(3)
-			self.SMD.eSetMulty(1,3)
+			self.SMD.eSetMulty(1,1)
 			self.SMD.eWriteMarchIHoldICode(1,1,1)
 			self.SMD.eSetPhaseMode(1,10)
 			self.SMD_endstopsTimer.start(1100)
+			self.ui.SMD_connect.setStyleSheet('background-color:red;')
 		
 		else:
 			self.SMD.close()
 			self.SMD_endstopsTimer.stop()
+			self.ui.SMD_connect.setStyleSheet('background-color:green;')
+			
 	def onSMD_endstopsTimer(self):
 		state = self.SMD.SM_state
 		print('State:',state)

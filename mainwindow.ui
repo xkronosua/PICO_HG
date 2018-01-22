@@ -58,7 +58,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>400</width>
+         <width>383</width>
          <height>685</height>
         </rect>
        </property>
@@ -271,7 +271,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>400</width>
+         <width>383</width>
          <height>685</height>
         </rect>
        </property>
@@ -659,7 +659,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>400</width>
+         <width>383</width>
          <height>685</height>
         </rect>
        </property>
@@ -1504,9 +1504,9 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QToolButton" name="startMeasurement">
+         <widget class="QPushButton" name="startMeasurement">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1541,6 +1541,9 @@ color: #222222;</string>
         </item>
         <item>
          <widget class="QRadioButton" name="measurementDirCCW">
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid blue;</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1553,6 +1556,9 @@ color: #222222;</string>
         </item>
         <item>
          <widget class="QRadioButton" name="measurementDirCW">
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid red;</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1584,6 +1590,9 @@ color: #222222;</string>
            <font>
             <kerning>true</kerning>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
           <property name="currentIndex">
            <number>1</number>
@@ -1651,6 +1660,12 @@ color: #222222;</string>
        <layout class="QHBoxLayout" name="fileConfig">
         <item>
          <widget class="QToolButton" name="saveToBtn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>File ...</string>
           </property>
@@ -1658,6 +1673,12 @@ color: #222222;</string>
         </item>
         <item>
          <widget class="QLineEdit" name="saveToPath">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>./test.txt</string>
           </property>
