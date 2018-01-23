@@ -52,7 +52,7 @@ class SMD004():
 					try:
 						#print('$'*100)
 						state=self.eGetState()
-						time.sleep(1)
+						time.sleep(0.6)
 						#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
 						#print("@"*10,state,"@"*10)
 						#self.handle_data(reading)

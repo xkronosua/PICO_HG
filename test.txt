@@ -4457,3 +4457,29 @@ position	ref	signal	Time
 -280.0	-5.62165912829e-08	0.0	1516608314.0019834	
 -380.0	-1.17753681384e-06	0.0	1516608315.1569867	
 -480.0	-2.18843158923e-07	0.0	1516608316.3129606	
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
