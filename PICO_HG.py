@@ -659,12 +659,14 @@ class PICO_HG(QtGui.QMainWindow):
 				self.SM1_stepRight()
 			else:
 				self.SM1_stepLeft()
+			x = float(self.ui.SM1_position.text())
 		elif self.ui.measurementMode.currentText() == 'SM2_step':
 			if direction == 1:
 				self.SM2_stepRight()
 			else:
 				self.SM2_stepLeft()
-
+			x = float(self.ui.SM2_position.text())
+		else: x=0
 		self.SMD.SMDSleep = False
 		
 		y0 = float(self.ui.CH2Val.text())
@@ -683,7 +685,7 @@ class PICO_HG(QtGui.QMainWindow):
 		#print("angle", angle)
 		#self.ui.currentAngle.setText(str(self.currentAngle))
 
-		x = float(self.ui.SM1_position.text())
+		
 		
 		out = [x,y0,y1,time.time()]
 		with open(self.ui.saveToPath.text(), 'a') as f:
@@ -955,12 +957,12 @@ class PICO_HG(QtGui.QMainWindow):
 		dx=(tdiv_val*10)/2048
 		
 		b = ref[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
-		bg=np.hstack((ref[:self.lr.getRegion()[0]],ref[self.lr.getRegion()[1]:]))
+		bg=ref[self.lr.getRegion()[1]:]
 		bg_i = 0
-		for i in range(len(bg)-1):
-			if bg[i]==0 and bg[i+1]==1:
-				bg_i = i+2
-		bg = bg[bg_i:]	
+		#for i in range(len(bg)-1):
+		#	if bg[i]==0 and bg[i+1]==1:
+		#		bg_i = i+2
+		#bg = bg[bg_i:]	
 		
 		Vpp2=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
 		
@@ -968,12 +970,12 @@ class PICO_HG(QtGui.QMainWindow):
 		#print("bg>",bg,"<",np.mean(bg), b,len(b), b-np.mean(bg)*np.ones(len(b)))
 		
 		b = sig[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
-		bg=np.hstack((sig[:self.lr.getRegion()[0]],sig[self.lr.getRegion()[1]:]))
-		bg_i = 0
-		for i in range(len(bg)-1):
-			if bg[i]==0 and bg[i+1]==1:
-				bg_i = i+2
-		bg = bg[bg_i:]	
+		bg=sig[self.lr.getRegion()[1]:]
+		#bg_i = 0
+		#for i in range(len(bg)-1):
+		#	if bg[i]==0 and bg[i+1]==1:
+		#		bg_i = i+2
+		#bg = bg[bg_i:]	
 		
 		Vpp1=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
 		
@@ -1047,14 +1049,14 @@ class PICO_HG(QtGui.QMainWindow):
 			print(self.SMD.str2hex(b"Hello"))
 			print(self.SMD.str2hex(b"\n\r"))
 			self.SMD.eSetTactFreq(1,160)
-			self.SMD.eSetTactFreq(2,160)
+			self.SMD.eSetTactFreq(2,80)
 			self.SMD.eClearStep(3)
 			self.SMD.eSetMulty(1,1)
-			self.SMD.eSetMulty(2,1)
-			self.SMD.eWriteMarchIHoldICode(1,1,1)
-			self.SMD.eWriteMarchIHoldICode(2,1,1)
+			self.SMD.eSetMulty(2,2)
+			self.SMD.eWriteMarchIHoldICode(1,3,1)
+			self.SMD.eWriteMarchIHoldICode(2,2,1)
 			self.SMD.eSetPhaseMode(1,10)
-			self.SMD.eSetPhaseMode(2,10)
+			self.SMD.eSetPhaseMode(2,0)
 			self.SMD_endstopsTimer.start(1100)
 			self.ui.SMD_connect.setStyleSheet('background-color:red;')
 		
@@ -1074,6 +1076,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.ui.SM2_leftEndstop.setChecked(not  state['SM2_end1'])
 		self.ui.SM2_rightEndstop.setChecked(not state['SM2_end2'])
 		self.ui.SM2_stepsCounter.setText(str(state['SM2_steps']))
+		#self.ui.SMD_Moving.setChecked(is state['SMs_end1'])
 
 	def SM1_stop(self):
 		self.SMDSleep = True
@@ -1091,9 +1094,9 @@ class PICO_HG(QtGui.QMainWindow):
 		steps = round(real_step*calibr)
 		self.SMD.makeStepCW(1,steps,True)
 		#self.SMDSleep = False
-		state=self.SMD.SM_state['SMs_state']
+		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
-		#	print('State:',self.SMD.SM_state)
+		print('State:',self.SMD.SM_state)
 		self.SM_position[0] -= real_step
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 		self.ui.SM1_leftEndstop.setChecked(not  state['SM1_end1'])
@@ -1106,9 +1109,9 @@ class PICO_HG(QtGui.QMainWindow):
 		calibr = float(calibr.split(',')[0])
 		real_step = self.ui.SM2_step.value()
 		steps = round(real_step*calibr)
-		self.SMD.makeStepCW(2,steps,True)
+		self.SMD.makeStepCCW(2,steps,True)
 		#self.SMDSleep = False
-		state=self.SMD.SM_state['SMs_state']
+		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		#	print('State:',self.SMD.SM_state)
 		self.SM_position[1] -= real_step
@@ -1125,9 +1128,9 @@ class PICO_HG(QtGui.QMainWindow):
 		steps = round(real_step*calibr)
 		self.SMD.makeStepCCW(1,steps,True)
 		#self.SMDSleep = False
-		state=self.SMD.SM_state['SMs_state']
+		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
-		#print('State:',self.SMD.SM_state)
+		print('State:',self.SMD.SM_state)
 		self.SM_position[0] += real_step
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 		self.ui.SM1_leftEndstop.setChecked(not  state['SM1_end1'])
@@ -1140,9 +1143,9 @@ class PICO_HG(QtGui.QMainWindow):
 		calibr = float(calibr.split(',')[0])
 		real_step = self.ui.SM2_step.value()
 		steps = round(real_step*calibr)
-		self.SMD.makeStepCCW(2,steps,True)
+		self.SMD.makeStepCW(2,steps,True)
 		#self.SMDSleep = False
-		state=self.SMD.SM_state['SMs_state']
+		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		#print('State:',self.SMD.SM_state)
 		self.SM_position[1] += real_step
@@ -1174,7 +1177,7 @@ class PICO_HG(QtGui.QMainWindow):
 		real_step = self.ui.SM2_step.value()
 		steps = round(real_step*calibr)
 		
-		self.SMD.moveCW(2,steps)
+		self.SMD.moveCCW(2,steps)
 		self.SMDSleep = False
 		#state=self.SMD.eGetState()
 		#f = lambda : e.eStop()
@@ -1204,7 +1207,7 @@ class PICO_HG(QtGui.QMainWindow):
 		real_step = self.ui.SM2_step.value()
 		steps = round(real_step*calibr)
 		self.SMDSleep = True
-		self.SMD.moveCCW(2,steps)
+		self.SMD.moveCW(2,steps)
 		self.SMDSleep = False
 		#state=self.SMD.eGetState()
 		#while state[1][0]!=0:

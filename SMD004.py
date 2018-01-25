@@ -52,7 +52,7 @@ class SMD004():
 					try:
 						#print('$'*100)
 						state=self.eGetState()
-						time.sleep(0.6)
+						time.sleep(1)
 						#SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
 						#print("@"*10,state,"@"*10)
 						#self.handle_data(reading)
@@ -287,6 +287,7 @@ class SMD004():
 				#time.sleep(0.5)
 				#r = self.ser.readline()
 				SM1_diff = SM1_steps - self.SM1_prev_steps
+				'''
 				if SM1_diff<-60000:
 					self.SM1_totalSteps += 32767
 				elif SM1_diff>60000:
@@ -295,6 +296,7 @@ class SMD004():
 					self.SM1_totalSteps += SM1_diff
 				elif SM1_diff<0:
 					self.SM1_totalSteps -= SM1_diff
+				'''
 				self.SM_prev_steps = SM1_steps
 				#print("|"*10, self.SM1_totalSteps)
 				self.SM1_totalSteps = SM1_steps

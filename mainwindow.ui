@@ -58,8 +58,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>391</width>
-         <height>624</height>
+         <width>355</width>
+         <height>685</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -271,8 +271,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>321</width>
-         <height>644</height>
+         <width>355</width>
+         <height>685</height>
         </rect>
        </property>
        <attribute name="label">
@@ -658,9 +658,9 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-216</y>
-         <width>316</width>
-         <height>840</height>
+         <y>0</y>
+         <width>355</width>
+         <height>685</height>
         </rect>
        </property>
        <attribute name="label">
@@ -668,14 +668,25 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QToolButton" name="SMD_connect">
-          <property name="text">
-           <string>connect</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QToolButton" name="SMD_connect">
+            <property name="text">
+             <string>connect</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="SMD_Moving">
+            <property name="text">
+             <string>Moving</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_2">
@@ -876,13 +887,6 @@
           <layout class="QGridLayout" name="gridLayout_11">
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_5">
-             <item row="7" column="2">
-              <widget class="QCheckBox" name="SM2_rightEndstop">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="2">
               <widget class="QCheckBox" name="SM2_lock">
                <property name="text">
@@ -890,7 +894,7 @@
                </property>
               </widget>
              </item>
-             <item row="7" column="0">
+             <item row="8" column="0">
               <widget class="QLabel" name="label_4">
                <property name="text">
                 <string>Endstops:</string>
@@ -993,22 +997,6 @@
                </property>
               </widget>
              </item>
-             <item row="7" column="1">
-              <widget class="QCheckBox" name="SM2_leftEndstop">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="autoRepeat">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
              <item row="5" column="1" colspan="3">
               <widget class="QSlider" name="SM2_speed">
                <property name="minimum">
@@ -1021,7 +1009,10 @@
                 <number>20</number>
                </property>
                <property name="value">
-                <number>160</number>
+                <number>80</number>
+               </property>
+               <property name="sliderPosition">
+                <number>80</number>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1043,7 +1034,7 @@
                 <number>90000</number>
                </property>
                <property name="value">
-                <number>160</number>
+                <number>80</number>
                </property>
               </widget>
              </item>
@@ -1051,6 +1042,29 @@
               <widget class="QLabel" name="SM2_stepsCounter">
                <property name="text">
                 <string>steps</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QCheckBox" name="SM2_rightEndstop">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="2">
+              <widget class="QCheckBox" name="SM2_leftEndstop">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="autoRepeat">
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -1559,7 +1573,7 @@
              <number>1</number>
             </property>
             <property name="value">
-             <number>5</number>
+             <number>6</number>
             </property>
            </widget>
           </item>
@@ -1781,7 +1795,7 @@ color: #222222;</string>
      <x>0</x>
      <y>0</y>
      <width>1163</width>
-     <height>40</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFIle">

@@ -4483,3 +4483,237 @@ position	ref	signal	Time
 #$OBJECT:PVDF40, bscat	=	=
 #$STEP_MODE:SM1_EndStop
 #position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
+20.0	-6.6456041838e-08	1.63750899465e-08	1516783387.004853	
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_EndStop
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+10.0	-5.42088558799e-08	-5.66582930715e-09	1516783623.8307543	
+20.0	-1.99167351974e-07	-8.80191200658e-09	1516783624.8830721	
+30.0	3.73438784951e-08	6.5130936472e-09	1516783625.9339013	
+40.0	-5.96297414679e-08	1.74271432977e-09	1516783626.984102	
+50.0	1.86719392475e-08	-2.40928248356e-10	1516783628.0378945	
+60.0	-1.3592368678e-07	2.67229582134e-08	1516783629.087047	
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_step
+#position	ref	signal	Time
+10.0	3.3910650956e-07	-1.24479594984e-09	1516783713.3759701	
+20.0	-2.78472900391e-07	1.16930509868e-08	1516783714.4306817	
+30.0	-1.20664897718e-07	1.40019467002e-08	1516783715.4816027	
+40.0	-2.81685277035e-07	5.61764365748e-09	1516783716.5356917	
+30.0	-2.90519312808e-07	6.30428916529e-10	1516783717.585581	
+20.0	-2.2406327097e-07	-5.88266473067e-09	1516783718.6356199	
