@@ -958,11 +958,22 @@ class PICO_HG(QtGui.QMainWindow):
 		
 		b = ref[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
 		bg=ref[self.lr.getRegion()[1]:]
-		bg_i = 0
-		#for i in range(len(bg)-1):
-		#	if bg[i]==0 and bg[i+1]==1:
-		#		bg_i = i+2
-		#bg = bg[bg_i:]	
+		
+		
+		
+		if self.ui.oscilloAuto.isChecked():
+			index2 = self.ui.oscilloVdiv2.currentIndex()
+			if b.min()<20 or b.max()>240:
+				if index2<12:
+					self.oscillo.vdiv2(index2+1)
+					self.ui.oscilloVdiv2.setCurrentIndex(index2+1)
+			elif abs(b.max() - b.min())<50:
+				 
+				if index2>1:
+					self.oscillo.vdiv2(index2-1)
+					self.ui.oscilloVdiv2.setCurrentIndex(index2-1)
+			
+				
 		
 		Vpp2=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
 		
@@ -971,11 +982,19 @@ class PICO_HG(QtGui.QMainWindow):
 		
 		b = sig[int(self.lr.getRegion()[0]):int(self.lr.getRegion()[1])]
 		bg=sig[self.lr.getRegion()[1]:]
-		#bg_i = 0
-		#for i in range(len(bg)-1):
-		#	if bg[i]==0 and bg[i+1]==1:
-		#		bg_i = i+2
-		#bg = bg[bg_i:]	
+		
+		
+		if self.ui.oscilloAuto.isChecked():
+			index1 = self.ui.oscilloVdiv1.currentIndex() 
+			if b.min()<20 or b.max()>240:
+				if index1<12:
+					self.oscillo.vdiv1(index1+1)
+					self.ui.oscilloVdiv1.setCurrentIndex(index1+1)
+			elif abs(b.max() - b.min())<50:
+				if index1>1:
+					self.oscillo.vdiv1(index1-1)
+					self.ui.oscilloVdiv1.setCurrentIndex(index1-1)
+		
 		
 		Vpp1=np.trapz(b-np.mean(bg)*np.ones(len(b)),dx=dx)
 		
