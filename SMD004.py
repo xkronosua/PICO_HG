@@ -170,7 +170,7 @@ class SMD004():
 		Фактическая длительность полупериода тактовой частоты равна величине, заданной командой 3, умноженной на величину множителя, заданную данной командой.
 		'''
 		#print(
-		self.write_(b'\xFF\x06\x02'+bytearray([stepper])+bytearray([multy]))#)
+		self.write_(b'\xFF\x06\x02'+bytearray([stepper, multy]))#)
 	def eWriteMarchIHoldICode(self,stepper, Im=0, Is=0):
 		u'''
 		Назначение: установка маршевого тока и тока удержания двигателей.
@@ -196,7 +196,7 @@ class SMD004():
 		 компонентов внутри модуля.
 		'''
 		#print(
-		self.write_(b'\xFF\x07\x03'+bytearray([stepper])+bytearray([Im])+bytearray([Is]))
+		self.write_(b'\xFF\x07\x03'+bytearray([stepper,Im, Is]))
 		#)
 	def eSetPhaseMode(self, stepper, mode='1x'):
 		u'''
@@ -217,7 +217,7 @@ class SMD004():
 		'''
 		#m = {'00':}
 		self.write_(b'\xFF\x08\x02'+bytearray([stepper])+b'\x10')
-		self.write_(b'\xFF\x08\x02'+bytearray([stepper])+bytearray([mode]))
+		self.write_(b'\xFF\x08\x02'+bytearray([stepper, mode]))
 	def makeStepCCW(self, stepper=1, steps=0, waitUntilReady=True):
 		
 		#state = self.eGetState(0.02)
@@ -281,8 +281,8 @@ class SMD004():
 			r = self.write(b"FF0400",delay)
 			if len(r)==12:
 				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
-				SM1_steps = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little',signed=True)
-				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little',signed=True) 
+				SM1_steps = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little',signed=False)
+				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little',signed=False) 
 				endstops = [int(i) for i in bin(endstops)[2:6]][::-1]
 				#time.sleep(0.5)
 				#r = self.ser.readline()
@@ -303,8 +303,8 @@ class SMD004():
 				if len(endstops)==4:
 					self.SM_state = {'SMs_state':SMs_state,	'SM1_steps':SM1_steps, 'SM1_mode':SM1_mode,
 															'SM2_steps':SM2_steps, 'SM2_mode':SM2_mode,
-															'SM1_end1':endstops[0], 'SM1_end2':endstops[1],
-															'SM2_end1':endstops[2], 'SM2_end2':endstops[3]}
+															'SM2_end1':endstops[0], 'SM2_end2':endstops[1],
+															'SM1_end1':endstops[2], 'SM1_end2':endstops[3]}
 															
 					return self.SM_state, r
 				#return r, SMs_state,(SM1_steps, SM1_mode),(SM2_steps, SM2_mode),endstops
@@ -330,8 +330,9 @@ class SMD004():
 	def write_(self, data,sleep=0.01):
 		if self.isConnected():
 			s = data
+			print('>> ',s)
 			s = self.cSum(s,bytesA=True)
-			
+			print('>>>',s)
 			# s = s.replace('\x','')
 			
 			#print( data, s, self.str2hex(s),type(s), '='*10)
@@ -428,7 +429,7 @@ if __name__ == "__main__":
 	except:
 		traceback.print_exc()
 		#e.ser.close()	
-	time.sleep(40)
+	time.sleep(10)
 	e.eStop()
 	e.close()
 	print(e.isConnected())
