@@ -35,7 +35,7 @@ from datetime import datetime
 
 import SMD004_ as SMD004
 import traceback
-
+from TCD1304 import TCD1304
 
 
 def sigint_handler(*args):
@@ -100,6 +100,20 @@ def peak2peak(ref,signal,smooth_ref=3,mean_calc=np.median, ref_mode='triangle'):
 	#print(STD)
 	return res,HIGH,LOW,STD,f,duty_cycle
 
+def d4sigma(a,bg=[]):
+	a = a[300:-300]
+	x = np.arange(len(a))
+	if len(bg)==0:
+		a0 = np.mean([a[:200],a[-200:]])
+	else:
+		a = a-bg[:len(a)]
+		a0 = min(a)
+	x0 = ((a-a0)*x).sum()/(a-a0).sum()
+	#print(x0,a0)
+	return 4*np.sqrt(np.dot(abs(a-a0),(x-x0)**2)/abs(a-a0).sum())
+
+
+
 
 class PICO_HG(QtGui.QMainWindow):
 	ui = None
@@ -109,6 +123,7 @@ class PICO_HG(QtGui.QMainWindow):
 	prevMove = ([0, 0], [0, 0])
 	line0, line1, line2, line3, line4, line5, line6, line7 = None, None, None, None, None, None, None, None
 	lines = [line0, line1, line2, line3, line4, line5, line6, line7]
+	lineCCD = None
 	steppingTimer = None
 	calibrTimer = None
 	measTimer = None
@@ -128,7 +143,7 @@ class PICO_HG(QtGui.QMainWindow):
 	moveFlag = 0
 	extLaserStrob = None
 	extDataBuffer = None
-
+	CCDlastTime = 0
 	oscillo = None
 	oscReadTimerTimer = None
 	lastFiltChTime = None
@@ -139,6 +154,7 @@ class PICO_HG(QtGui.QMainWindow):
 	SM_position = [0,0]
 	serOscilloThread = None
 	oscilloRefreshPlot = False
+	CCD_data = []
 	#et = ET1255()
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -150,6 +166,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.calibrFWTimer = QtCore.QTimer()
 		self.measTimer = QtCore.QTimer()
 		self.angleUpdateTimer = QtCore.QTimer()
+		self.updateCCDTimer = QtCore.QTimer()
 
 		self.SMD_endstopsTimer = QtCore.QTimer()
 
@@ -178,8 +195,75 @@ class PICO_HG(QtGui.QMainWindow):
 		self.oscilloLastMaster = 'HAMEG'
 
 		self.SMD = SMD004.SMD004()
-		
+		self.CCD = TCD1304()
+
 		#self.startLaserStrob(0.02)
+	def CCD_connect(self,state):
+		if state:
+			self.CCD = TCD1304(trigger=self.ui.CCD_trigger.currentIndex(),
+				integration=self.ui.CCD_exposure.value())
+			self.CCD.start()
+			if not self.CCD.error_q.empty():
+				print(self.CCD.error_q.get())
+				self.CCD.stop()
+				self.ui.CCD_connect.setStyleSheet('background-color:#222222;')
+				self.ui.CCD_connect.setChecked(False)
+			else:
+				self.updateCCDTimer.start(500)
+				self.ui.CCD_connect.setStyleSheet('background-color:green;')
+		else:
+			self.updateCCDTimer.stop()
+			self.CCD.stop()
+			self.ui.CCD_connect.setStyleSheet('background-color:#222222;')
+
+	def onUpdateCCDTimer(self):
+		#self.updateTimer.stop()
+		tDiff = time.time() - self.CCDlastTime
+		self.CCDlastTime = time.time()
+		print('tDiff:\t',tDiff)
+		t = time.time()
+		if not self.CCD.error_q.empty():
+			self.CCD.stop()
+			self.ui.CCD_connect.setStyleSheet('background-color:#222222;')
+			self.ui.CCD_connect.setChecked(False)
+			
+			while not self.CCD.error_q.empty():
+				err = self.CCD.error_q.get()
+				print(err)	
+				
+			return	
+
+		stack = []#self.CCD.data_q.get()[0]
+		cn = 0
+		while not self.CCD.data_q.empty():
+			stack.append( self.CCD.data_q.get()[0])
+			cn += 1
+		if len(stack)==0: return
+		data = np.sum(stack,axis=0)/(cn+1)
+		if sum(data)==0:
+			self.CCD.stop()
+			self.CCD = TCD1304(trigger=False,
+				integration=self.ui.CCD_exposure.value())
+			print('Trigger: Int.')
+			self.CCD.start()
+			time.sleep(0.2)
+			self.CCD.stop()
+			self.CCD = TCD1304(trigger=self.ui.CCD_trigger.currentIndex(),
+				integration=self.ui.CCD_exposure.value())
+			self.CCD.start()
+			print('Trigger: Ext.')
+			
+		print("#",cn,cn/tDiff)
+		d4s = d4sigma(data)
+		#print(time.time()-t,d4s)
+		self.lineCCD.setData(data)
+		self.CCD_data = data
+		self.ui.CCD_sum.setText(str(int(data.sum())))
+		try:
+			self.ui.D4Sigma.setText(str(int(d4s)))
+		except ValueError:
+			self.ui.D4Sigma.setText("nan")
+
 	def updateSettingsTable(self):
 		if 'GLOBAL' in self.config.sections():
 			section = self.config['GLOBAL']
@@ -268,6 +352,13 @@ class PICO_HG(QtGui.QMainWindow):
 		self.ui.dataPlot.addWidget(self.pw)
 		self.pw2 = pg.PlotWidget(name='Plot2')
 		self.ui.dataPlot.addWidget(self.pw2)
+		self.pwCCD = pg.PlotWidget(name='PlotCCD')
+		self.ui.CCDPlot.addWidget(self.pwCCD)
+		self.pwCCD.showGrid(x=True, y=True)
+		self.pwCCD.setXRange(0, 4000)
+		self.pwCCD.setYRange(0, 65000)
+		
+
 		self.osc_pw = pg.PlotWidget(name='Plot3')
 		self.ui.oscilloPlot.addWidget(self.osc_pw)
 		#self.osc_pw.setXRange(0, 360)
@@ -276,6 +367,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.pw.showGrid(x=True, y=True)
 		self.pw2.showGrid(x=True, y=True)
 		
+
 		#self.osc_pw.showAxis('bottom', False)
 		self.osc_pw.setYRange(0, 256)
 		self.osc_pw.setXRange(0, 256)
@@ -305,6 +397,9 @@ class PICO_HG(QtGui.QMainWindow):
 		self.line2.setPen(QtGui.QColor("orange"))
 		self.line3 = self.osc_pw.plot()
 		self.line3.setPen(QtGui.QColor("cyan"))
+
+		self.lineCCD = self.pwCCD.plot()
+		self.lineCCD.setPen(QtGui.QColor("magenta"))
 
 		self.pw.setLabel('left', 'Signal', units='arb. un.')
 		self.pw.setLabel('bottom', 'position', units='deg.')
@@ -584,8 +679,11 @@ class PICO_HG(QtGui.QMainWindow):
 				f.write("#$WAVELENGTH:"+self.config['GLOBAL']['wavelength'].replace('\n','\t')+'\n')
 				f.write("#$OBJECT:"+self.config['GLOBAL']['object'].replace('\n','\t')+'\n')
 				f.write("#$STEP_MODE:"+self.ui.measurementMode.currentText()+'\n')
-
-				f.write("#position\tref\tsignal\tTime\n")
+				if self.ui.CCD_connect.isChecked():
+					self.updateCCDTimer.stop()
+					f.write("#position\tref\tsignal\tTime\td4sigma\tCCDsum\t")+"\t".join(np.arange(3648).astype(str))+"\n"
+				else:
+					f.write("#position\tref\tsignal\tTime\n")
 			
 			self.measTimer.start(self.ui.plotPeriod.value())
 			
@@ -634,6 +732,9 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.line2.setData(x=data[:,4], y=data[:,1])
 			#self.line3.setData(x=data[:,-1], y=data[:,2])
 			self.ui.startMeasurement.setStyleSheet('background-color:green;')
+			
+			if self.ui.CCD_connect.isChecked():
+				self.updateCCDTimer.start(500)
 			
 			
 	def onContMeasTimer(self):
@@ -685,13 +786,15 @@ class PICO_HG(QtGui.QMainWindow):
 		#print("angle", angle)
 		#self.ui.currentAngle.setText(str(self.currentAngle))
 
-		
-		
-		out = [x,y0,y1,time.time()]
+		self.onUpdateCCDTimer()
+		d4s = self.ui.D4sigma.text()
+		CCD_sum = self.ui.CCD_sum.text()
+		out = [x,y0,y1,time.time(),d4s,CCD_sum]
 		with open(self.ui.saveToPath.text(), 'a') as f:
 				for i in out:
 					f.write(str(i)+"\t")
-				f.write("\n")
+				f.write("\t".join(self.CCD_data.astype(str))+"\n")
+
 				
 		#print(self.measData)
 		try:
@@ -1121,8 +1224,8 @@ class PICO_HG(QtGui.QMainWindow):
 		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		print('State:',self.SMD.SM_state)
-		self.SM_position[0] -= real_step
-		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
+		#self.SMD.SM_position[0] -= real_step
+		self.ui.SM1_position.setText(str(round(self.SMD.SM_position[0],6)))
 		self.ui.SM1_leftEndstop.setChecked(not  state['SM1_end1'])
 		self.ui.SM1_rightEndstop.setChecked(not state['SM1_end2'])
 		self.ui.SM1_stepsCounter.setText(str(state['SM1_steps']))
@@ -1138,8 +1241,8 @@ class PICO_HG(QtGui.QMainWindow):
 		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		#	print('State:',self.SMD.SM_state)
-		self.SM_position[1] -= real_step
-		self.ui.SM2_position.setText(str(round(self.SM_position[1],6)))
+		#self.SM_position[1] -= real_step
+		self.ui.SM2_position.setText(str(round(self.SMD.SM_position[1],6)))
 		self.ui.SM2_leftEndstop.setChecked(not  state['SM2_end1'])
 		self.ui.SM2_rightEndstop.setChecked(not state['SM2_end2'])
 		self.ui.SM2_stepsCounter.setText(str(state['SM2_steps']))
@@ -1155,8 +1258,8 @@ class PICO_HG(QtGui.QMainWindow):
 		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		print('State:',self.SMD.SM_state)
-		self.SM_position[0] += real_step
-		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
+		#self.SM_position[0] += real_step
+		self.ui.SM1_position.setText(str(round(self.SMD.SM_position[0],6)))
 		self.ui.SM1_leftEndstop.setChecked(not  state['SM1_end1'])
 		self.ui.SM1_rightEndstop.setChecked(not state['SM1_end2'])
 		self.ui.SM1_stepsCounter.setText(str(state['SM1_steps']))
@@ -1172,8 +1275,8 @@ class PICO_HG(QtGui.QMainWindow):
 		state=self.SMD.SM_state#['SMs_state']
 		#while state!=0:
 		#print('State:',self.SMD.SM_state)
-		self.SM_position[1] += real_step
-		self.ui.SM2_position.setText(str(round(self.SM_position[1],6)))
+		#self.SM_position[1] += real_step
+		self.ui.SM2_position.setText(str(round(self.SMD.SM_position[1],6)))
 		self.ui.SM2_leftEndstop.setChecked(not  state['SM2_end1'])
 		self.ui.SM2_rightEndstop.setChecked(not state['SM2_end2'])
 		self.ui.SM2_stepsCounter.setText(str(state['SM2_steps']))
@@ -1208,7 +1311,7 @@ class PICO_HG(QtGui.QMainWindow):
 		#while state[1][0]!=0:
 		#	state=self.SMD.eGetState()
 		#	print('State:',state)
-		#self.SM_position[0] = 0
+		#self.SMD.SM_position[2] = 0
 		#self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 
 	def SM1_right2end(self):
@@ -1222,7 +1325,7 @@ class PICO_HG(QtGui.QMainWindow):
 		#while state[1][0]!=0:
 		#	state=self.SMD.eGetState()
 		#	print('State:',state)
-		#self.SM_position[0] = 0
+		#self.SMD.SM_position[0] = 0
 		#self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 
 	def SM2_right2end(self):
@@ -1241,14 +1344,14 @@ class PICO_HG(QtGui.QMainWindow):
 		#self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 
 	def SM1_reset(self):
-		self.SM_position[0] = 0
+		self.SMD.SM_position[0] = 0
 		self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
 		self.SMDSleep = True
 		self.SMD.eClearStep(3)
 		self.SMDSleep = False
 
 	def SM2_reset(self):
-		self.SM_position[0] = 0
+		self.SMD.SM_position[0] = 0
 		self.ui.SM2_position.setText(str(round(self.SM_position[0],6)))
 		self.SMDSleep = True
 		self.SMD.eClearStep(3)
@@ -1265,26 +1368,31 @@ class PICO_HG(QtGui.QMainWindow):
 		calibr = float(self.config['GLOBAL']['SM1_calibr_coef'])
 		
 		if ok:
-			if to_pos>self.SM_position[0]:
-				real_step = abs(to_pos-self.SM_position[0])
+			if to_pos>self.SMD.SM_position[0]:
+				real_step = abs(to_pos-self.SMD.SM_position[0])
 				steps = round(real_step*calibr)
 				self.SMD.makeStepCW(1,steps,True)
 				state=self.SMD.eGetState()
 				while state[1][0]!=0:
 					state=self.SMD.eGetState()
 					print('State:',state)
-				self.SM_position[0] += real_step
-			elif to_pos<self.SM_position[0]:
-				real_step = abs(to_pos-self.SM_position[0])
+				self.SMD.SM_position[0] += real_step
+			elif to_pos<self.SMD.SM_position[0]:
+				real_step = abs(to_pos-self.SMD.SM_position[0])
 				steps = round(real_step*calibr)
 				self.SMD.makeStepCCW(1,steps,True)
 				state=self.SMD.eGetState()
 				while state[1][0]!=0:
 					state=self.SMD.eGetState()
 					print('State:',state)
-				self.SM_position[0] -= real_step
-			self.ui.SM1_position.setText(str(round(self.SM_position[0],6)))
+				#self.SMD.SM_position[0] -= real_step
+			self.ui.SM1_position.setText(str(round(self.SMD.SM_position[0],6)))
 	
+	def SM1_lock(self,state):
+		self.SMD.eLock(1,state)
+
+	def SM2_lock(self,state):
+		self.SMD.eLock(2,state)
 	def SM2_moveTo(self):
 
 		pass
@@ -1309,9 +1417,13 @@ class PICO_HG(QtGui.QMainWindow):
 		self.SMD.eSetParams(stepper=2,steps=0,prev=True)
 
 	def uiConnect(self):
+		self.ui.CCD_connect.toggled[bool].connect(self.CCD_connect)
 
 		self.ui.SMD_connect.toggled[bool].connect(self.SMD_connect)
 		self.ui.SM1_speed.valueChanged[int].connect(self.SM1_speed)
+
+		self.ui.SM1_lock.toggled[bool].connect(self.SM1_lock)
+		self.ui.SM2_lock.toggled[bool].connect(self.SM1_lock)
 
 		self.ui.SM1_speed_val.valueChanged[int].connect(self.ui.SM1_speed.setValue)
 		self.ui.SM1_stop.clicked.connect(self.SM1_stop)
@@ -1387,6 +1499,8 @@ class PICO_HG(QtGui.QMainWindow):
 		self.angleUpdateTimer.timeout.connect(self.onAngleUpdateTimer)
 		self.calibrHomeTimer.timeout.connect(self.onCalibrHomeTimer)
 		self.oscReadTimer.timeout.connect(self.onOscReadTimer)
+
+		self.updateCCDTimer.timeout.connect(self.onUpdateCCDTimer)
 
 		self.SMD_endstopsTimer.timeout.connect(self.onSMD_endstopsTimer)
 		#self.calibrFWTimer.timeout.connect(self.onCalibrFWTimer)

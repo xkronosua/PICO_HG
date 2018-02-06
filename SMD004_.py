@@ -15,11 +15,11 @@ class SMD004():
 	serThread = None
 	SM_state = {}
 	started = False
-	SM1_totalSteps = 0
-	SM1_prev_steps = 0
+	SM_position = [0,0]
 	forceStop = False
 	lockFlow = False
-
+	Im = [2,2]
+	Is = [1,1]
 	threadKillCounter = 0
 	def __init__(self, parent=None):
 		self.eInit()
@@ -236,13 +236,21 @@ class SMD004():
 		 компонентов внутри модуля.
 		'''
 		
-
+		self.Im[stepper-1] = Im
+		if Is!=0:
+			self.Is[stepper-1] = Is
 		s = self.ATrtAddr +b'\x07\x03'+bytearray([stepper,Im, Is])
 		s = self.write(s)
 		print("eWriteMarchIHoldICode\t>>\t",s)
 		#time.sleep(0.1)
 		r = self.read(len(s))
 		print("eWriteMarchIHoldICode\t<<\t",r)
+
+	def eLock(self,stepper,state):
+		if state:
+			self.eWriteMarchIHoldICode(stepper,Im=self.Im[stepper-1],Is=self.Is[stepper-1])
+		else:
+			self.eWriteMarchIHoldICode(stepper,Im=self.Im[stepper-1],Is=0)
 
 	def eSetPhaseMode(self, stepper, mode='1x'):
 		u'''
@@ -283,7 +291,7 @@ class SMD004():
 		self.eSetParams(stepper,'ccw_step',steps)
 		self.eStart(stepper)
 		if waitUntilReady:
-			def wait():
+			#def wait():
 				while not self.forceStop:
 					if not self.lockFlow:
 						state = self.eGetState()
@@ -291,12 +299,13 @@ class SMD004():
 						time.sleep(0.5)
 						try:
 							if state['SMs_state'] == 0:
+								self.SM_position[stepper-1]+=steps
 								break
 						except:
 							pass
 					else:
 						time.sleep(1)
-			threading.Thread(target=wait).start()
+			#threading.Thread(target=wait).start()
 			
 
 	def makeStepCW(self, stepper=1, steps=0, waitUntilReady=True):
@@ -306,21 +315,23 @@ class SMD004():
 		#def f():
 		self.eSetParams(stepper,'cw_step',steps)
 		self.eStart(stepper)
+		
 		if waitUntilReady:
-			def wait():
+			#def wait():
 				while not self.forceStop:
 					if not self.lockFlow:
 						state = self.eGetState()
 						print("makeStepCW_thread:",state)
-						time.sleep(0.5)
+						time.sleep(0.1)
 						try:
 							if state['SMs_state'] == 0:
+								self.SM_position[stepper-1]-=steps
 								break
 						except:
 							pass
 					else:
 						time.sleep(1)
-			threading.Thread(target=wait).start()
+			#threading.Thread(target=wait).start()
 			
 	def moveCCW(self, stepper=1):
 		steps=0
@@ -370,7 +381,7 @@ class SMD004():
 
 			if len(r)==12:
 				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
-				SM1_steps = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little')#,signed=False)
+				SM1_steps = 65536-int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little')#,signed=False)
 				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little')#,signed=False) 
 				#print([int(i) for i in format(endstops, "08b")])
 				endstops = [int(i) for i in format(endstops, "08b")[:4]]
