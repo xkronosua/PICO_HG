@@ -381,7 +381,11 @@ class SMD004():
 
 			if len(r)==12:
 				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
-				SM1_steps = 65536-int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little')#,signed=False)
+				s1 = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little')#,signed=False)
+				if s1==0:
+					SM1_steps = 0
+				else:
+					SM1_steps = 65536-s1
 				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little')#,signed=False) 
 				#print([int(i) for i in format(endstops, "08b")])
 				endstops = [int(i) for i in format(endstops, "08b")[:4]]
