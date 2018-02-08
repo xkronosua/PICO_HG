@@ -372,7 +372,12 @@ class PICO_HG(QtGui.QMainWindow):
 		#self.osc_pw.showAxis('bottom', False)
 		self.osc_pw.setYRange(0, 256)
 		self.osc_pw.setXRange(0, 256)
-		self.osc_pw.setMaximumWidth(400)
+		self.osc_pw.setMaximumWidth(300)
+		self.osc_pw.setMaximumHeight(200)
+		self.osc_pw.setMinimumHeight(100)
+		self.pwCCD.setMinimumHeight(200)
+		self.pwCCD.setMaximumHeight(400)
+		
 		self.lr = pg.LinearRegionItem([20,200])
 		self.lr.setZValue(-10)
 		self.osc_pw.addItem(self.lr)
@@ -1250,7 +1255,7 @@ class PICO_HG(QtGui.QMainWindow):
 		else:                                     
 			if position < tab[0,0]:               
 				step = tab[0,1]                                           
-			for i in range(len(tab)):                                     
+			for i in range(len(tab)-1):                                     
 					if tab[i+1,0]>=position:                              
 						step = tab[i,1]                                   
 						if position-step<tab[i,0]:                        
@@ -1491,9 +1496,7 @@ class PICO_HG(QtGui.QMainWindow):
 
 	def SM2_lock(self,state):
 		self.SMD.eLock(2,state)
-	def SM2_moveTo(self):
 
-		pass
 
 
 	def SM1_speed(self,val):
@@ -1531,6 +1534,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.ui.SM1_right2end.clicked.connect(self.SM1_right2end)
 		self.ui.SM1_reset.clicked.connect(self.SM1_reset)
 		self.ui.SM1_absMove.clicked.connect(self.SM1_moveTo)
+		self.ui.SM2_absMove.clicked.connect(self.SM2_moveTo)
 
 		self.ui.SM2_speed.valueChanged[int].connect(self.SM2_speed)
 

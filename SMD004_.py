@@ -386,7 +386,11 @@ class SMD004():
 					SM1_steps = 0
 				else:
 					SM1_steps = 65536-s1
-				SM2_steps = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little')#,signed=False) 
+				s2 = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little')#,signed=False)
+				if s2==0:
+					SM2_steps = 0
+				else:
+					SM2_steps = 65536-s2
 				#print([int(i) for i in format(endstops, "08b")])
 				endstops = [int(i) for i in format(endstops, "08b")[:4]]
 				

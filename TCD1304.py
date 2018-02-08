@@ -93,7 +93,7 @@ class TCD1304(threading.Thread):
 				data = self.getData()
 				timestamp = time.clock()
 				self.data_q.put((data, timestamp))
-
+				time.sleep(0.05)
 				#print(data.sum(),self.error_q.get())
 
 			except (serial.SerialException, OSError) as e:

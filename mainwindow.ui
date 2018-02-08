@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
-    <height>574</height>
+    <width>796</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,58 +20,29 @@
    <locale language="English" country="UnitedStates"/>
   </property>
   <widget class="QWidget" name="cw">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
     <item>
      <layout class="QVBoxLayout" name="mainView">
       <item>
-       <layout class="QHBoxLayout" name="fileConfig">
-        <item>
-         <widget class="QToolButton" name="saveToBtn">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>File ...</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="saveToPath">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>./test.txt</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="measureBar">
-        <property name="spacing">
-         <number>6</number>
-        </property>
+       <layout class="QGridLayout" name="gridLayout_3">
         <property name="sizeConstraint">
-         <enum>QLayout::SetNoConstraint</enum>
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
-        <property name="bottomMargin">
+        <property name="spacing">
          <number>0</number>
         </property>
-        <item>
-         <widget class="QPushButton" name="startMeasurement">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="1" column="1">
+         <widget class="QToolButton" name="startCalibr">
+          <property name="text">
+           <string>Calibr</string>
           </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="startMeasurement">
           <property name="styleSheet">
            <string notr="true">background-color: rgb(99, 220, 85);
 color: #222222;</string>
@@ -84,37 +55,7 @@ color: #222222;</string>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QToolButton" name="startCalibr">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Calibr</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="measurementDirCCW">
-          <property name="styleSheet">
-           <string notr="true">border: 1px solid blue;</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset theme="arrow-left">
-            <normaloff>.</normaloff>.</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
+        <item row="1" column="3">
          <widget class="QRadioButton" name="measurementDirCW">
           <property name="styleSheet">
            <string notr="true">border: 1px solid red;</string>
@@ -124,21 +65,50 @@ color: #222222;</string>
           </property>
           <property name="icon">
            <iconset theme="arrow-right">
-            <normaloff>.</normaloff>.</iconset>
+            <normaloff/>
+           </iconset>
           </property>
           <property name="checked">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QComboBox" name="measurementMode">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="1" column="2">
+         <widget class="QRadioButton" name="measurementDirCCW">
+          <property name="styleSheet">
+           <string notr="true">border: 1px solid blue;</string>
           </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset theme="arrow-left">
+            <normaloff/>
+           </iconset>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QDoubleSpinBox" name="plotPeriod">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>5000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>500.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QComboBox" name="measurementMode">
           <property name="maximumSize">
            <size>
             <width>150</width>
@@ -154,7 +124,7 @@ color: #222222;</string>
            <string notr="true"/>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="frame">
            <bool>true</bool>
@@ -181,28 +151,17 @@ color: #222222;</string>
           </item>
          </widget>
         </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="plotPeriod">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="0" column="0">
+         <widget class="QToolButton" name="saveToBtn">
+          <property name="text">
+           <string>File ...</string>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>100</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="minimum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>5000.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>500.000000000000000</double>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="5">
+         <widget class="QLineEdit" name="saveToPath">
+          <property name="text">
+           <string>./test.txt</string>
           </property>
          </widget>
         </item>
@@ -210,8 +169,17 @@ color: #222222;</string>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
         <item>
          <layout class="QVBoxLayout" name="leftView">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -220,7 +188,7 @@ color: #222222;</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
-              <height>20</height>
+              <height>0</height>
              </size>
             </property>
            </spacer>
@@ -230,10 +198,37 @@ color: #222222;</string>
             <property name="sizeConstraint">
              <enum>QLayout::SetMinimumSize</enum>
             </property>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="dataPlot"/>
+           <layout class="QVBoxLayout" name="dataPlot">
+            <item>
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -245,7 +240,7 @@ color: #222222;</string>
           <item>
            <widget class="QToolBox" name="dataSources">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -257,15 +252,15 @@ color: #222222;</string>
              </size>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="page_HAMEG">
              <property name="geometry">
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>346</width>
-               <height>333</height>
+               <width>222</width>
+               <height>315</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -776,91 +771,110 @@ color: #222222;</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>346</width>
-               <height>333</height>
+               <width>249</width>
+               <height>121</height>
               </rect>
              </property>
              <attribute name="label">
               <string>CCD</string>
              </attribute>
-             <layout class="QGridLayout" name="gridLayout_3">
-              <item row="1" column="0" rowspan="2">
-               <widget class="QPushButton" name="CCD_connect">
-                <property name="text">
-                 <string>Connect</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QComboBox" name="CCD_trigger">
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
-                 <property name="text">
-                  <string>Int.</string>
-                 </property>
+                 <widget class="QPushButton" name="CCD_connect">
+                  <property name="text">
+                   <string>Connect</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
                 </item>
                 <item>
-                 <property name="text">
-                  <string>Ext.</string>
-                 </property>
+                 <widget class="QComboBox" name="CCD_trigger">
+                  <item>
+                   <property name="text">
+                    <string>Int.</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Ext.</string>
+                   </property>
+                  </item>
+                 </widget>
                 </item>
-               </widget>
+                <item>
+                 <widget class="QSpinBox" name="CCD_exposure">
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="value">
+                   <number>1</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="maximumSize">
+                   <size>
+                    <width>30</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>%</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
-              <item row="3" column="1">
-               <widget class="QSpinBox" name="CCD_exposure">
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>100</number>
-                </property>
-                <property name="value">
-                 <number>1</number>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2">
-               <widget class="QLabel" name="label_2">
-                <property name="maximumSize">
-                 <size>
-                  <width>30</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>%</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>D4Sigma:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2">
-               <widget class="QLabel" name="D4Sigma">
-                <property name="toolTip">
-                 <string>fast diameter</string>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">font: 75 18pt &quot;Noto Sans&quot;;
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QLabel" name="label_5">
+                  <property name="text">
+                   <string>D4Sigma:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="D4Sigma">
+                  <property name="toolTip">
+                   <string>fast diameter</string>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">font: 75 18pt &quot;Noto Sans&quot;;
 color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text">
-                 <string>nan</string>
-                </property>
-               </widget>
+                  </property>
+                  <property name="text">
+                   <string>nan</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
-              <item row="3" column="3">
-               <widget class="QLabel" name="CCD_sum">
-                <property name="text">
-                 <string>nan</string>
-                </property>
-               </widget>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="text">
+                   <string>Integr.:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="CCD_sum">
+                  <property name="text">
+                   <string>nan</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -868,28 +882,31 @@ color: rgb(255, 0, 0);</string>
           </item>
           <item>
            <layout class="QVBoxLayout" name="oscilloPlot">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <item>
-             <spacer name="verticalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Ignored</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>81</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMaximumSize</enum>
+            </property>
            </layout>
           </item>
          </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Minimum</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -898,7 +915,7 @@ color: rgb(255, 0, 0);</string>
     <item>
      <widget class="QToolBox" name="toolBox">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -932,8 +949,8 @@ color: rgb(255, 0, 0);</string>
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>410</width>
-         <height>399</height>
+         <width>320</width>
+         <height>389</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -1145,8 +1162,8 @@ color: rgb(255, 0, 0);</string>
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>410</width>
-         <height>399</height>
+         <width>326</width>
+         <height>376</height>
         </rect>
        </property>
        <attribute name="label">
@@ -1538,9 +1555,9 @@ color: rgb(255, 0, 0);</string>
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-297</y>
-         <width>390</width>
-         <height>696</height>
+         <y>-180</y>
+         <width>307</width>
+         <height>569</height>
         </rect>
        </property>
        <attribute name="label">
@@ -1548,23 +1565,19 @@ color: rgb(255, 0, 0);</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="0">
-           <widget class="QToolButton" name="SMD_connect">
-            <property name="text">
-             <string>connect</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QToolButton" name="SMD_connect">
+          <property name="text">
+           <string>connect</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1573,10 +1586,37 @@ color: rgb(255, 0, 0);</string>
            <string>SM1</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>9</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMinimumSize</enum>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <item row="7" column="2">
               <widget class="QCheckBox" name="SM1_rightEndstop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1584,6 +1624,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="7" column="0">
               <widget class="QLabel" name="label_3">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Endstops:</string>
                </property>
@@ -1591,6 +1637,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="7" column="1">
               <widget class="QCheckBox" name="SM1_leftEndstop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1626,6 +1678,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="6" column="2">
               <widget class="QLabel" name="SM1_stepsCounter">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;SM1 driver stepCounter&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
@@ -1663,7 +1721,7 @@ color: rgb(255, 0, 0);</string>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>16777215</width>
+                 <width>100</width>
                  <height>100</height>
                 </size>
                </property>
@@ -1685,6 +1743,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="0" column="0" colspan="2">
               <widget class="QDoubleSpinBox" name="SM1_step">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="decimals">
                 <number>6</number>
                </property>
@@ -1701,38 +1765,68 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="0" column="2">
               <widget class="QRadioButton" name="SM1_moving">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
               </widget>
              </item>
              <item row="1" column="0" colspan="3">
-              <layout class="QGridLayout" name="gridLayout_4">
-               <item row="1" column="4">
-                <widget class="QToolButton" name="SM1_right2end">
-                 <property name="text">
-                  <string>&gt;&gt;|</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
                 <widget class="QToolButton" name="SM1_left2end">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>|&lt;&lt;</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="3">
+               <item>
+                <widget class="QPushButton" name="SM1_stepLeft">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>&lt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QPushButton" name="SM1_stepRight">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>&gt;</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
-                <widget class="QPushButton" name="SM1_stepLeft">
+               <item>
+                <widget class="QToolButton" name="SM1_right2end">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
-                  <string>&lt;</string>
+                  <string>&gt;&gt;|</string>
                  </property>
                 </widget>
                </item>
@@ -1740,6 +1834,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="6" column="0">
               <widget class="QCheckBox" name="SM1_tabStep">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>tabStep</string>
                </property>
@@ -1747,6 +1847,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="0">
               <widget class="QPushButton" name="SM1_reset">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>reset</string>
                </property>
@@ -1754,6 +1860,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="5" column="0">
               <widget class="QPushButton" name="SM1_stop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>stop</string>
                </property>
@@ -1761,6 +1873,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="1">
               <widget class="QPushButton" name="SM1_absMove">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>MoveTo</string>
                </property>
@@ -1768,6 +1886,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="2">
               <widget class="QPushButton" name="SM1_lock">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Lock</string>
                </property>
@@ -1787,7 +1911,7 @@ color: rgb(255, 0, 0);</string>
         <item>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1796,10 +1920,34 @@ color: rgb(255, 0, 0);</string>
            <string>SM2</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_9">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item row="0" column="0">
             <layout class="QGridLayout" name="gridLayout_5">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMinimumSize</enum>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <item row="8" column="0">
               <widget class="QLabel" name="label_4">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Endstops:</string>
                </property>
@@ -1826,6 +1974,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="8" column="1">
               <widget class="QCheckBox" name="SM2_rightEndstop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1833,6 +1987,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="8" column="2">
               <widget class="QCheckBox" name="SM2_leftEndstop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1849,6 +2009,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="2">
               <widget class="QPushButton" name="SM2_lock">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Lock</string>
                </property>
@@ -1884,6 +2050,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="6" column="2">
               <widget class="QLabel" name="SM2_stepsCounter">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>nan</string>
                </property>
@@ -1899,7 +2071,7 @@ color: rgb(255, 0, 0);</string>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>16777215</width>
+                 <width>100</width>
                  <height>100</height>
                 </size>
                </property>
@@ -1918,6 +2090,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="0" column="0" colspan="2">
               <widget class="QDoubleSpinBox" name="SM2_step">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="decimals">
                 <number>6</number>
                </property>
@@ -1934,38 +2112,68 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="0" column="2">
               <widget class="QRadioButton" name="SM2_moving">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string/>
                </property>
               </widget>
              </item>
              <item row="1" column="0" colspan="3">
-              <layout class="QGridLayout" name="gridLayout_6">
-               <item row="1" column="4">
-                <widget class="QToolButton" name="SM2_right2end">
-                 <property name="text">
-                  <string>&gt;&gt;|</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item>
                 <widget class="QToolButton" name="SM2_left2end">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>|&lt;&lt;</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item>
                 <widget class="QPushButton" name="SM2_stepLeft">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>&lt;</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="3">
+               <item>
                 <widget class="QPushButton" name="SM2_stepRight">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QToolButton" name="SM2_right2end">
+                 <property name="maximumSize">
+                  <size>
+                   <width>100</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>&gt;&gt;|</string>
                  </property>
                 </widget>
                </item>
@@ -1973,6 +2181,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="6" column="0">
               <widget class="QCheckBox" name="SM2_tabStep">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>tabStep</string>
                </property>
@@ -1980,6 +2194,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="0">
               <widget class="QPushButton" name="SM2_reset">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>reset</string>
                </property>
@@ -1987,6 +2207,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="4" column="1">
               <widget class="QPushButton" name="SM2_absMove">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>MoveTo</string>
                </property>
@@ -1994,6 +2220,12 @@ color: rgb(255, 0, 0);</string>
              </item>
              <item row="5" column="0">
               <widget class="QPushButton" name="SM2_stop">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>stop</string>
                </property>
@@ -2015,8 +2247,8 @@ color: rgb(255, 0, 0);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1134</width>
-     <height>30</height>
+     <width>796</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFIle">
