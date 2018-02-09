@@ -61,8 +61,8 @@ class SMD004():
 		self.forceStop = False
 		cSumOk = True
 		self.eGetState()
-		self.SM_position[0] = self.SM_state['SM1_steps']
-		self.SM_position[1] = self.SM_state['SM2_steps']
+		#self.SM_position[0] = self.SM_state['SM1_steps']
+		#self.SM_position[1] = self.SM_state['SM2_steps']
 		
 		threading.Thread(target=self.getStateThread).start()
 		self.threadKillCounter = 0
@@ -343,6 +343,7 @@ class SMD004():
 								self.waitUntilReadyState = False
 								break
 						except:
+							self.waitUntilReadyState = False
 							pass
 					else:
 						time.sleep(1)
@@ -435,6 +436,7 @@ class SMD004():
 		r = 'None'
 		if self.lockFlow:
 			r = self.ser.read(1)
+			time.sleep(0.01)
 			total_len = 1
 			if len_check!=0:
 				for i in range(10):
@@ -445,8 +447,12 @@ class SMD004():
 					if total_len == len_check:
 						break
 		self.lockFlow = False
-		self.cSumOk = 0#self.cSum(r[-1:])[-1]==r[-1]
-
+		try:
+			self.cSumOk = self.cSum(r[-1:])[-1]==r[-1]
+		except:
+			print('SMD_connectionError')
+			self.close()
+			self.eOpenCOMPort()
 		return r
 
 	def cSum(self, command):
