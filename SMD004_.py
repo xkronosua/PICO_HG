@@ -445,7 +445,7 @@ class SMD004():
 					if total_len == len_check:
 						break
 		self.lockFlow = False
-		self.cSumOk = self.cSum(r[-1:])[-1]==r[-1]
+		self.cSumOk = 0#self.cSum(r[-1:])[-1]==r[-1]
 
 		return r
 
