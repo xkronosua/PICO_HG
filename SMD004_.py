@@ -21,6 +21,8 @@ class SMD004():
 	Im = [2,2]
 	Is = [1,1]
 	threadKillCounter = 0
+	waitUntilReadyState = False
+	cSumOk = True
 	def __init__(self, parent=None):
 		self.eInit()
 		ser = None
@@ -57,12 +59,17 @@ class SMD004():
 		
 		self.connected = True
 		self.forceStop = False
+		cSumOk = True
+		self.eGetState()
+		self.SM_position[0] = self.SM_state['SM1_steps']
+		self.SM_position[1] = self.SM_state['SM2_steps']
+		
 		threading.Thread(target=self.getStateThread).start()
 		self.threadKillCounter = 0
 	
 	def getStateThread(self):
 		
-		while not self.forceStop and self.threadKillCounter<10:
+		while not self.forceStop and self.threadKillCounter<5:
 			if not self.lockFlow:
 				state = self.eGetState()
 				print("StateThread:",state)
@@ -283,7 +290,7 @@ class SMD004():
 		r = self.read(len(s))
 		print("eSetPhaseMode\t<<\t",r)
 
-	def makeStepCCW(self, stepper=1, steps=0, waitUntilReady=True):
+	def makeStepCCW(self, stepper=1, steps=0, waitUntilReady=True,threadWait=False):
 		
 		#state = self.eGetState(0.02)
 		#print('State', state)
@@ -291,8 +298,9 @@ class SMD004():
 		self.eSetParams(stepper,'ccw_step',steps)
 		self.eStart(stepper)
 		if waitUntilReady:
-			#def wait():
-				while not self.forceStop:
+			def wait():
+				self.waitUntilReadyState = True
+				while not self.forceStop and self.threadKillCounter<5:
 					if not self.lockFlow:
 						state = self.eGetState()
 						print("makeStepCCW_thread:",state)
@@ -300,15 +308,20 @@ class SMD004():
 						try:
 							if state['SMs_state'] == 0:
 								self.SM_position[stepper-1]+=steps
+								self.waitUntilReadyState = False
 								break
 						except:
 							pass
 					else:
 						time.sleep(1)
-			#threading.Thread(target=wait).start()
+
+			if threadWait:
+				threading.Thread(target=wait).start()
+			else:
+				wait()
 			
 
-	def makeStepCW(self, stepper=1, steps=0, waitUntilReady=True):
+	def makeStepCW(self, stepper=1, steps=0, waitUntilReady=True,threadWait=False):
 		#state = self.eGetState(0.02)
 
 		#print('State', state)
@@ -317,8 +330,9 @@ class SMD004():
 		self.eStart(stepper)
 		
 		if waitUntilReady:
-			#def wait():
-				while not self.forceStop:
+			def wait():
+				self.waitUntilReadyState = True
+				while not self.forceStop and self.threadKillCounter<5:
 					if not self.lockFlow:
 						state = self.eGetState()
 						print("makeStepCW_thread:",state)
@@ -326,12 +340,16 @@ class SMD004():
 						try:
 							if state['SMs_state'] == 0:
 								self.SM_position[stepper-1]-=steps
+								self.waitUntilReadyState = False
 								break
 						except:
 							pass
 					else:
 						time.sleep(1)
-			#threading.Thread(target=wait).start()
+			if threadWait:
+				threading.Thread(target=wait).start()
+			else:
+				wait()
 			
 	def moveCCW(self, stepper=1):
 		steps=0
@@ -381,6 +399,8 @@ class SMD004():
 
 			if len(r)==12:
 				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
+				
+				
 				s1 = int.from_bytes(bytearray([SM1_steps0,SM1_steps1]), byteorder='little')#,signed=False)
 				if s1==0:
 					SM1_steps = 0
@@ -425,6 +445,8 @@ class SMD004():
 					if total_len == len_check:
 						break
 		self.lockFlow = False
+		self.cSumOk = self.cSum(r[-1:])[-1]==r[-1]
+
 		return r
 
 	def cSum(self, command):
