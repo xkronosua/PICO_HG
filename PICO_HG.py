@@ -618,7 +618,7 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.angleUpdateTimer.stop()
 			self.oscReadTimer.stop()
 			
-			with open(self.ui.saveToPath.text(), 'a') as f:
+			with open(self.saveToPath.text(), 'a') as f:
 				f.write("\n#$Filter:"+self.getCurrentFilter()[0]+"\n")
 				for row in range(6):
 					name = self.ui.filtersTab.item(row,0).text()
@@ -677,7 +677,7 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.openAngleSensorPort(True)
 			#self.angleUpdateTimer.start()
 			self.calibrData=np.array([])
-			#data = np.loadtxt(self.ui.saveToPath.text(),comments='#')
+			#data = np.loadtxt(self.saveToPath.text(),comments='#')
 			#self.line2.setData(x=data[:,4], y=data[:,1])
 			#self.line3.setData(x=data[:,-1], y=data[:,2])
 			#self.ui.actionStart.setStyleSheet('background-color:green;')
@@ -746,7 +746,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.onUpdateCCDTimer()
 			
 			
-			with open(self.ui.saveToPath.text(), 'a') as f:
+			with open(self.saveToPath.text(), 'a') as f:
 					
 					if self.ui.CCD_connect.isChecked():
 						d4s = self.ui.D4Sigma.text()
@@ -1138,14 +1138,14 @@ class PICO_HG(QtGui.QMainWindow):
 			time.sleep(2)
 			#print(self.SMD.str2hex(b"Hello"))
 			#print(self.SMD.str2hex(b"\n\r"))
-			self.SMD.eSetTactFreq(1,160)
+			self.SMD.eSetTactFreq(1,224)
 			self.SMD.eSetTactFreq(2,80)
 			#self.SMD.eClearStep(3)
-			self.SMD.eSetMulty(1,1)
+			self.SMD.eSetMulty(1,2)
 			self.SMD.eSetMulty(2,2)
-			self.SMD.eWriteMarchIHoldICode(1,3,1)
+			self.SMD.eWriteMarchIHoldICode(1,3,2)
 			self.SMD.eWriteMarchIHoldICode(2,2,1)
-			self.SMD.eSetPhaseMode(1,10)
+			self.SMD.eSetPhaseMode(1,0)
 			self.SMD.eSetPhaseMode(2,0)
 			self.ui.SM1_position.setText(str(round(self.SMD.SM_position[0],6)))
 			self.ui.SM2_position.setText(str(round(self.SMD.SM_position[1],6)))

@@ -424,7 +424,7 @@ class SMD004():
 					return self.SM_state
 	
 
-	def write(self, data,delay=0.02):
+	def write(self, data,delay=0.03):
 		self.lockFlow = True
 		if self.isConnected():
 			data = self.cSum(data)
@@ -436,14 +436,14 @@ class SMD004():
 		r = 'None'
 		if self.lockFlow:
 			r = self.ser.read(1)
-			time.sleep(0.01)
+			time.sleep(0.03)
 			total_len = 1
 			if len_check!=0:
 				for i in range(10):
 					n = self.ser.inWaiting()
 					r += self.ser.read(n)
 					total_len += n
-					time.sleep(0.01)
+					time.sleep(0.03)
 					if total_len == len_check:
 						break
 		self.lockFlow = False
@@ -451,8 +451,8 @@ class SMD004():
 			self.cSumOk = self.cSum(r[-1:])[-1]==r[-1]
 		except:
 			print('SMD_connectionError')
-			self.close()
-			self.eOpenCOMPort()
+			#self.close()
+			#self.eOpenCOMPort()
 		return r
 
 	def cSum(self, command):
