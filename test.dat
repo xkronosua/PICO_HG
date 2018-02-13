@@ -1,0 +1,26 @@
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_Step
+#position	counter	ref	signal	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM2_Step
+#position	counter	ref	signal	Time

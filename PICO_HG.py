@@ -4,6 +4,13 @@
 #from ET1255 import *
 #from smd004b import *
 #from SMD_test2 import *
+
+
+import os
+import qdarkstyle
+
+os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5' 
+
 from HAMEG import HAMEG
 import signal
 from pyqtgraph.Qt import QtGui, QtCore
@@ -19,10 +26,10 @@ import threading
 from multiprocessing import Process
 
 import sys
-from PyQt4 import uic
+from PyQt5 import uic
 import time
-from PyQt4.QtCore import QTimer, QThread, SIGNAL
-from PyQt4.QtGui import QApplication, QMessageBox, QTableWidgetItem, QFileDialog
+#from PyQt5.QtCore import QtCore.QTimer, QtCore.QThread, QtCore.SIGNAL
+#from PyQt4.QtGui import QtGui.QApplication, QtGui.QMessageBox, QtGui.QTableWidgetItem, QtGui.QFileDialog
 
 import subprocess
 import sys, os
@@ -41,7 +48,7 @@ from TCD1304 import TCD1304
 def sigint_handler(*args):
 	"""Handler for the SIGINT signal."""
 	sys.stderr.write('\r')
-	QApplication.quit()
+	QtGui.QApplication.quit()
 
 
 """
@@ -158,7 +165,7 @@ class PICO_HG(QtGui.QMainWindow):
 	#et = ET1255()
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
-		from mainwindow import Ui_mw
+		#from mainwindow import Ui_mw
 		self.ui = uic.loadUi("mainwindow.ui")#Ui_mw()
 		#self.ui.setupUi(self)
 		#self.show()
@@ -189,7 +196,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.uiConnect()
 		
 		
-		self.fileDialog = QFileDialog(self)
+		self.fileDialog = QtGui.QFileDialog(self)
 
 		#self.initET1255()
 		self.tmpData = []#[[0,0,0]]
@@ -278,7 +285,7 @@ class PICO_HG(QtGui.QMainWindow):
 				print(row,key)
 				for column,val in enumerate(section[key].split(',')):
 					print(column,val)
-					newitem = QTableWidgetItem(val)
+					newitem = QtGui.QTableWidgetItem(val)
 					self.ui.globalConfig.setItem(row,column,newitem)
 
 		if 'FILTERS' in self.config.sections():
@@ -288,12 +295,12 @@ class PICO_HG(QtGui.QMainWindow):
 				print(row,key)
 				for column,val in enumerate(section[key].split(',')):
 					print(column,val)
-					newitem = QTableWidgetItem(val)
+					newitem = QtGui.QTableWidgetItem(val)
 					self.ui.filtersTab.setItem(row,column,newitem)
 		#for column, key in enumerate(section):
-			#	newitem = QTableWidgetItem(item)
+			#	newitem = QtGui.QTableWidgetItem(item)
 			#	for row, item in enumerate(self.data[key]):
-			#		newitem = QTableWidgetItem(item)
+			#		newitem = QtGui.QTableWidgetItem(item)
 			#		self.setItem(row, column, newitem)
 
 			
@@ -337,7 +344,7 @@ class PICO_HG(QtGui.QMainWindow):
 				print(row,key)
 				for column,val in enumerate(section[key].split(',')):
 					print(column,val)
-					newitem = QTableWidgetItem(val)
+					newitem = QtGui.QTableWidgetItem(val)
 					self.ui.globalConfig.setItem(row,column,newitem)
 
 		if 'FILTERS' in self.config.sections():
@@ -345,11 +352,11 @@ class PICO_HG(QtGui.QMainWindow):
 			self.ui.globalConfig.setVerticalHeaderLabels(list(section))
 			for row,key in enumerate(section):
 				print(row,key)
-				newitem = QTableWidgetItem(key)
+				newitem = QtGui.QTableWidgetItem(key)
 				self.ui.filtersTab.setItem(row,0,newitem)
 				for column,val in enumerate(section[key].split(',')):
 					print(column,val)
-					newitem = QTableWidgetItem(val)
+					newitem = QtGui.QTableWidgetItem(val)
 					self.ui.filtersTab.setItem(row,column+1,newitem)
 		'''
 
@@ -540,40 +547,13 @@ class PICO_HG(QtGui.QMainWindow):
 				pass
 
 
-
-	def startMeasurement(self, state):
-		if state:
-			if self.isStepperConnected():
-				self.steppingTimer.start()
-				self.ui.actionStart.setText("Stop")
-				self.getCurrentFilter(self)
-
-			else:
-				self.ui.actionStart.setChecked(False)
-				self.ui.actionStart.setText("Start")
-		else:
-			self.steppingTimer.stop()
-			self.ui.actionStart.setText("Start")
-			self.num = 0
-			self.calibrData = []
-
-
-	def stepperOn(self):
-		pass
-
-	def getStepperState(self):
-		state = [ i.value for i in getState(self.ATrtAddr, 1)]
-		#if sum(state) == 0:
-		#   state [0] = 1
-		return state
-
 	
 
 	def startCalibr(self, state):
 		if state:
-			self.calibrTimer.start(self.measDelay.value())
+			self.calibrTimer.start(self.ui.measDelay.value())
 			
-			direction = 1 if self.ui.actionForward.isChecked() else -1
+			direction = 1 if self.ui.measForward.isChecked() else -1
 			self.line0.setData(x=[],y=[])
 			self.line1.setData(x=[],y=[])
 			self.line2.setData(x=[],y=[])
@@ -618,7 +598,7 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.angleUpdateTimer.stop()
 			self.oscReadTimer.stop()
 			
-			with open(self.saveToPath.text(), 'a') as f:
+			with open(self.ui.measFilePath.text(), 'a') as f:
 				f.write("\n#$Filter:"+self.getCurrentFilter()[0]+"\n")
 				for row in range(6):
 					name = self.ui.filtersTab.item(row,0).text()
@@ -627,37 +607,37 @@ class PICO_HG(QtGui.QMainWindow):
 				f.write("#$POWER:"+self.config['GLOBAL']['power'].replace('\n','\t')+'\n')
 				f.write("#$WAVELENGTH:"+self.config['GLOBAL']['wavelength'].replace('\n','\t')+'\n')
 				f.write("#$OBJECT:"+self.config['GLOBAL']['object'].replace('\n','\t')+'\n')
-				f.write("#$STEP_MODE:"+self.measMode.currentText()+'\n')
+				f.write("#$STEP_MODE:"+self.ui.measMode.currentText()+'\n')
 				if self.ui.CCD_connect.isChecked():
 					self.updateCCDTimer.stop()
 					f.write("#position\tcounter\tref\tsignal\tTime\td4sigma\tCCDsum\t"+"\t".join(np.arange(3648).astype(str))+"\n")
 				else:
 					f.write("#position\tcounter\tref\tsignal\tTime\n")
 			
-			self.measTimer.start(self.measDelay.value())
+			self.measTimer.start(self.ui.measDelay.value())
 			
-			direction = 1 if self.ui.actionForward.isChecked() else -1
-			if self.measMode.currentText() == 'SM1_EndStop':
+			direction = 1 if self.ui.measForward.isChecked() else -1
+			if self.ui.measMode.currentText() == 'SM1_EndStop':
 				if direction == 1:
 					self.SM1_left2end()
 				else:
 					self.SM1_right2end()
-			elif self.measMode.currentText() == 'SM1_step':
+			elif self.ui.measMode.currentText() == 'SM1_step':
 				#self.oscilloSleep = True
 				self.SMD.SMDSleep = True
-			elif self.measMode.currentText() == 'SM2_EndStop':
+			elif self.ui.measMode.currentText() == 'SM2_EndStop':
 				if direction == 1:
 					self.SM2_left2end()
 				else:
 					self.SM2_right2end()
-			elif self.measMode.currentText() == 'SM2_step':
+			elif self.ui.measMode.currentText() == 'SM2_step':
 				#self.oscilloSleep = True
 				self.SMD.SMDSleep = True
 
 			self.line0.setData(x=[],y=[])
 			self.line1.setData(x=[],y=[])
 			
-			#self.ui.actionStart.setStyleSheet('background-color:red;')
+			self.ui.measStart.setStyleSheet('background-color:red;')
 		else:
 
 			self.SM1_stop()
@@ -669,18 +649,18 @@ class PICO_HG(QtGui.QMainWindow):
 			#except:
 			#   print('Err')
 			self.measTimer.stop()
-			self.oscReadTimer.start(self.measDelay.value())
-			if self.measMode.currentText() == 'smallStep':
+			self.oscReadTimer.start(self.ui.measDelay.value())
+			if self.ui.measMode.currentText() == 'smallStep':
 				#self.oscilloSleep = False
 				self.SMD.SMDSleep = False
 
 			#self.openAngleSensorPort(True)
 			#self.angleUpdateTimer.start()
 			self.calibrData=np.array([])
-			#data = np.loadtxt(self.saveToPath.text(),comments='#')
+			#data = np.loadtxt(self.ui.measFilePath.text(),comments='#')
 			#self.line2.setData(x=data[:,4], y=data[:,1])
 			#self.line3.setData(x=data[:,-1], y=data[:,2])
-			#self.ui.actionStart.setStyleSheet('background-color:green;')
+			self.ui.measStart.setStyleSheet('background-color:green;')
 			
 			if self.ui.CCD_connect.isChecked():
 				self.updateCCDTimer.start(500)
@@ -690,14 +670,14 @@ class PICO_HG(QtGui.QMainWindow):
 		if self.SMD.waitUntilReadyState:
 			pass
 		else:
-			if not self.ui.actionStart.isChecked():
+			if not self.ui.measStart.isChecked():
 				self.measTimer.stop()
-				self.oscReadTimer.start(self.measDelay.value())
+				self.oscReadTimer.start(self.ui.measDelay.value())
 			r=[]
 			#chanels=[0,1,2]
 			############################################################################
 			#r = self.oscilloGetData()
-			#if self.measMode.currentText() == 'EndStop':
+			#if self.ui.measMode.currentText() == 'EndStop':
 			#	pass
 			#else:
 			self.measTimer.stop()
@@ -708,16 +688,16 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.SMD.SMDSleep = True
 			#r = self.oscilloGetData()
 			
-			direction = 1 if self.ui.actionForward.isChecked() else -1
-			print(self.ui.actionForward.isChecked())
-			if self.measMode.currentText() == 'SM1_step':
+			direction = 1 if self.ui.measForward.isChecked() else -1
+			print(self.ui.measForward.isChecked())
+			if self.ui.measMode.currentText() == 'SM1_step':
 				if direction == 1:
 					self.SM1_stepRight()
 				else:
 					self.SM1_stepLeft()
 				x = float(self.ui.SM1_position.text())
 				counter = float(self.ui.SM1_stepsCounter.text())
-			elif self.measMode.currentText() == 'SM2_step':
+			elif self.ui.measMode.currentText() == 'SM2_step':
 				if direction == 1:
 					self.SM2_stepRight()
 				else:
@@ -746,7 +726,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.onUpdateCCDTimer()
 			
 			
-			with open(self.saveToPath.text(), 'a') as f:
+			with open(self.ui.measFilePath.text(), 'a') as f:
 					
 					if self.ui.CCD_connect.isChecked():
 						d4s = self.ui.D4Sigma.text()
@@ -772,7 +752,7 @@ class PICO_HG(QtGui.QMainWindow):
 			
 			#print(data)
 
-			self.measTimer.start(self.measDelay.value())
+			self.measTimer.start(self.ui.measDelay.value())
 			
 			#self.updateAngle(x)
 			app.processEvents()  
@@ -781,7 +761,7 @@ class PICO_HG(QtGui.QMainWindow):
 	def _saveToBtn(self):
 		filename = self.fileDialog.getSaveFileName(self)
 		print(filename)
-		self.saveToPath.setText(filename)
+		self.ui.measFilePath.setText(filename)
 
 
 	def openAngleSensorPort(self,state):
@@ -983,7 +963,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.serOscilloThread.start()
 			'''
 			#return self.ser.isOpen()
-			self.oscReadTimer.start(self.measDelay.value())
+			self.oscReadTimer.start(self.ui.measDelay.value())
 			self.ui.oscilloConnect.setStyleSheet('background-color:red;')
 		else:
 			self.oscilloConnected = False	
@@ -1082,7 +1062,7 @@ class PICO_HG(QtGui.QMainWindow):
 		except AttributeError:
 			res=[np.nan,np.nan,np.nan]
 
-		self.oscReadTimer.start(self.measDelay.value())
+		self.oscReadTimer.start(self.ui.measDelay.value())
 		print(res)
 
 	def oscilloAutoSet(self):
@@ -1375,7 +1355,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.SMD.eClearStep(1)
 
 	def SM2_reset(self):
-		self.SMD.SM_position[0] = 0
+		self.SMD.SM_position[1] = 0
 		self.ui.SM2_position.setText(str(round(self.SM_position[0],6)))
 		self.SMD.eClearStep(2)
 	
@@ -1446,8 +1426,8 @@ class PICO_HG(QtGui.QMainWindow):
 		self.SMD.eLock(1,state)
 
 	def SM2_lock(self,state):
-		self.SMD.eLock(2,state)
-
+		#self.SMD.eLock(2,state)
+		self.SMD.eHardReset(2)
 
 
 	def SM1_speed(self,val):
@@ -1496,22 +1476,6 @@ class PICO_HG(QtGui.QMainWindow):
 	def initUi(self):
 
 		###########   mainToolBar  #############
-		self.measMode = QtGui.QComboBox()
-		self.ui.mainToolBar.addWidget(self.measMode)
-		self.measMode.insertItems(1,["SM1_step","SM1_EndStop","SM2_step","SM2_EndStop","Angle"])
-
-		self.measDelay = QtGui.QSpinBox()
-		self.ui.mainToolBar.addWidget(self.measDelay)
-		self.measDelay.setMinimum(1)
-		self.measDelay.setMaximum(99999)
-		self.measDelay.setValue(500)
-
-		self.saveToBtn = QtGui.QToolButton()
-		self.ui.mainToolBar.addWidget(self.saveToBtn)
-		
-		self.saveToPath = QtGui.QLineEdit()
-		self.saveToPath.setText('./test.dat')
-		self.ui.mainToolBar.addWidget(self.saveToPath)
 		
 
 
@@ -1614,8 +1578,8 @@ class PICO_HG(QtGui.QMainWindow):
 		self.ui.SM2_absMove.clicked.connect(self.SM2_moveTo)
 		self.ui.SM2_setPosition.clicked.connect(self.SM2_setPosition)
 
-		self.ui.actionCalibrate.toggled[bool].connect(self.startCalibr)
-		self.ui.actionStart.toggled[bool].connect(self.startContMeas)
+		self.ui.measCalibr.toggled[bool].connect(self.startCalibr)
+		self.ui.measStart.toggled[bool].connect(self.startContMeas)
 
 		
 		###################    HAMEG  #################################
@@ -1651,13 +1615,13 @@ class PICO_HG(QtGui.QMainWindow):
 		self.ui.stepperStop.clicked.connect(self.stepperStop)
 		self.ui.stepperLock.toggled[bool].connect(self.stepperLock)
 
-		self.saveToBtn.clicked.connect(self._saveToBtn)
+		self.ui.measSetFilePath.clicked.connect(self._saveToBtn)
 		#self.ui.resetAngle.clicked.connect(self.updateAngle)
 		#self.ui.setCustomAngle.toggled[bool].connect(self.setCustomAngle)
 
 		#self.ui.calibrFW.clicked.connect(self.calibrFW)
 
-		#self.ui.actionStart.clicked.connect(self.startMeasurement)
+		self.ui.measStart.clicked.connect(self.startContMeas)
 
 		#self.steppingTimer.timeout.connect(self.stepMeasurement)
 		self.calibrTimer.timeout.connect(self.onCalibrTimer)
@@ -1685,6 +1649,7 @@ class PICO_HG(QtGui.QMainWindow):
 if __name__ == "__main__":
 	signal.signal(signal.SIGINT, sigint_handler)
 	app = QtGui.QApplication(sys.argv)
+	app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 	myWindow = PICO_HG(None)
 	app.exec_()
 	#SMD_CloseComPort()

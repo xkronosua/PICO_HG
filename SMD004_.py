@@ -151,7 +151,9 @@ class SMD004():
 				code_mode = self.SM_state['SM'+str(stepper)+"_mode"]
 				s = self.ATrtAddr +b"\x02\x04"+bytearray([stepper]) + code_mode + st
 			except:
-				pass
+				self.eStop(stepper)
+				return
+				
 		else:
 			s = self.ATrtAddr +b"\x02\x04"+bytearray([stepper]) + m[mode]+st
 		s = self.write(s)
@@ -183,6 +185,29 @@ class SMD004():
 		except:
 			print ("Lost connection!")
 			return 0
+	def eHardReset(self,stepper=3):
+		'''Назначение: сброс контроллеров шаговых двигателей.
+			Байт 1-й 2-й 3-й 4-й 5-й
+			Значение Адрес 09 hex 01 hex 01 hex – для 1-го двигателя Контрольная сумма
+										 02 hex – для 2-го двигателя
+										 03 hex – для двух двигателей одновременно
+
+			Ответ модуля: возвращает принятые байты без изменений.
+			Примечание к команде 9.
+			После сброса устанавливается следущее исходное состояние фаз двигателя:
+			Фаза 		 A   -A    B   -B
+			Напряжение   0   Uпит  0   Uпит
+			Это состояние устанавливается также после включения питания модуля.
+			Команда имеет побочный эффект: если двигатель находился в волновом режиме полного шага, то он
+			переключится в нормальный режим полного шага.
+		'''
+		s = self.ATrtAddr + b'\x09\x01'+bytearray([stepper])
+		s = self.write(s)
+		print("eHardReset\t>>\t",s)
+		time.sleep(5)
+		r = self.read(len(s))
+		print("eHardReset\t<<\t",r)
+
 	def eClearStep(self, stepper=3):
 		u'''
 		Назначение: обнуление счетчика шагов.
@@ -440,6 +465,7 @@ class SMD004():
 			total_len = 1
 			if len_check!=0:
 				for i in range(10):
+					time.sleep(0.03)
 					n = self.ser.inWaiting()
 					r += self.ser.read(n)
 					total_len += n
@@ -450,9 +476,18 @@ class SMD004():
 		try:
 			self.cSumOk = self.cSum(r[-1:])[-1]==r[-1]
 		except:
+			self.forceStop = True
+			self.lockFlow = True
 			print('SMD_connectionError')
-			#self.close()
-			#self.eOpenCOMPort()
+			self.eHardReset(3)
+			time.sleep(5)
+			self.eStop(3)
+			self.lockFlow = False
+			self.forceStop = False
+			self.ser.flush()
+			self.close()
+			
+			self.eOpenCOMPort()
 		return r
 
 	def cSum(self, command):
