@@ -4,6 +4,7 @@ import codecs
 import base64
 import threading
 import traceback
+import queue
 from serial.tools import list_ports
 
 
@@ -23,6 +24,8 @@ class SMD004():
 	threadKillCounter = 0
 	waitUntilReadyState = False
 	cSumOk = True
+	commandQueue = queue.Queue()
+	stateQueue = queue.Queue()
 	def __init__(self, parent=None):
 		self.eInit()
 		ser = None
@@ -35,6 +38,13 @@ class SMD004():
 		#print(self.write_(b'\xFF\x03\x05\x01\x60\x00\x00\x00'))#b"FF03050132000000")
 		#print(self.write_(b"\xFF\x04\x00"))
 		#print(self.write_(b"\xFF\x08\x02\x01\x01"))
+	def add2queue(func):
+		def wrapper(*args,**kwargs):
+			self = args[0]
+			self.commandQueue.put(lambda: func(*args,**kwargs))
+
+		return wrapper
+			
 
 	def eOpenCOMPort(self,port=1):
 		ports = list(list_ports.grep("0403:6001"))
@@ -42,7 +52,9 @@ class SMD004():
 			if p.usb_description() == 'USB <-> Serial':
 				port = p.device
 
-		self.ser = serial.Serial(port, baudrate=19200,timeout=1, bytesize=serial.EIGHTBITS,parity=serial.PARITY_MARK,stopbits=serial.STOPBITS_ONE,xonxoff=False,rtscts=False,dsrdtr=False)
+		self.ser = serial.Serial(port, baudrate=19200,timeout=0.1, bytesize=serial.EIGHTBITS,parity=serial.PARITY_MARK,stopbits=serial.STOPBITS_ONE)#,xonxoff=False,rtscts=False,dsrdtr=False)
+		self.commandQueue = queue.Queue()
+		self.stateQueue = queue.Queue()
 
 		self.ser.write(b'\x00\x00\x00')
 		r = b''
@@ -64,21 +76,22 @@ class SMD004():
 		#self.SM_position[0] = self.SM_state['SM1_steps']
 		#self.SM_position[1] = self.SM_state['SM2_steps']
 		
-		threading.Thread(target=self.getStateThread).start()
+		threading.Thread(target=self.procThread).start()
 		self.threadKillCounter = 0
 	
-	def getStateThread(self):
-		
-		while not self.forceStop and self.threadKillCounter<5:
-			if not self.lockFlow:
-				state = self.eGetState()
-				print("StateThread:",state)
-				time.sleep(0.5)
-				self.threadKillCounter += 1
+	def procThread(self):
+		while not self.forceStop and self.ser:
+			if not self.commandQueue.empty():
+				#print(self.ser,self.isConnected())
+				command = self.commandQueue.get()
+				#print(command)
+				command()
+				self.commandQueue.task_done()
+				
 			else:
-				pass
-			time.sleep(1)
-			
+
+				time.sleep(0.5)
+
 
 	def close(self):
 		self.connected = False	
@@ -86,7 +99,7 @@ class SMD004():
 		#self.serThread.cancel()
 
 		self.ser.close()
-
+	@add2queue
 	def eStop(self, stepper=3):
 		u'''
 		Назначение: стоп вращения двигателя.
@@ -98,11 +111,10 @@ class SMD004():
 		'''
 		#self.write(b"FF010101")
 		s = self.ATrtAddr +b"\x01\x01"+bytearray([stepper])
-		s = self.write(s)
-		print("eStop\t>>\t",s)
-		r = self.read(len(s))
-		print("eStop\t<<\t",r)
-	
+		print("eStop",end='')
+		r = self.write_read(s)
+
+	@add2queue
 	def eStart(self, stepper=1):
 		u'''
 		Назначение: старт вращения двигателя.
@@ -112,13 +124,11 @@ class SMD004():
 											03 hex – старт двух двигателей одновременно	
 		Ответ модуля: возвращает принятые байты без изменений.
 		'''
-
 		s = self.ATrtAddr +b"\x00\x01"+bytearray([stepper])
-		s = self.write(s)
-		print("eStart\t>>\t",s)
-		r = self.read(len(s))
-		print("eStart\t<<\t",r)
-
+		print("eStart",end='')
+		r = self.write_read(s)
+	
+	@add2queue	
 	def eSetParams(self,stepper=1,mode='ccw_step',steps=0,prev=False):
 		u'''
 		Назначение: установка режима вращения двигателя.
@@ -156,11 +166,10 @@ class SMD004():
 				
 		else:
 			s = self.ATrtAddr +b"\x02\x04"+bytearray([stepper]) + m[mode]+st
-		s = self.write(s)
-		print("eSetParams\t>>\t",s)
-		r = self.read(len(s))
-		print("eSetParams\t<<\t",r)
-
+		print("eSetParams",end='')
+		r = self.write_read(s)
+		
+	@add2queue
 	def eSetTactFreq(self, stepper=1, freq=68):
 		u'''
 		Назначение: установка скорости вращения двигателя.
@@ -170,14 +179,13 @@ class SMD004():
 		'''
 		#print(
 		s = self.ATrtAddr + b'\x03\x05'+bytearray([stepper])+(freq).to_bytes(4,'little')
-		s = self.write(s)
-		print("eSetTactFreq\t>>\t",s)
-		r = self.read(len(s))
-		print("eSetTactFreq\t<<\t",r)
+		print("eSetTactFreq",end='')
+		r = self.write_read(s)
+		
 
 	def isConnected(self):
 		try:
-			if self.connected == True:
+			if self.ser:
 				self.ser.inWaiting()
 				return 1
 			else:
@@ -185,6 +193,8 @@ class SMD004():
 		except:
 			print ("Lost connection!")
 			return 0
+
+	@add2queue
 	def eHardReset(self,stepper=3):
 		'''Назначение: сброс контроллеров шаговых двигателей.
 			Байт 1-й 2-й 3-й 4-й 5-й
@@ -202,12 +212,9 @@ class SMD004():
 			переключится в нормальный режим полного шага.
 		'''
 		s = self.ATrtAddr + b'\x09\x01'+bytearray([stepper])
-		s = self.write(s)
-		print("eHardReset\t>>\t",s)
-		time.sleep(5)
-		r = self.read(len(s))
-		print("eHardReset\t<<\t",r)
-
+		print("eHardReset",end='')
+		r = self.write_read(s)
+	@add2queue
 	def eClearStep(self, stepper=3):
 		u'''
 		Назначение: обнуление счетчика шагов.
@@ -220,12 +227,10 @@ class SMD004():
 		'''
 		\
 		s = self.ATrtAddr + b'\x05\x01'+bytearray([stepper])
-		s = self.write(s)
-		print("eClearStep\t>>\t",s)
-		#time.sleep(0.1)
-		r = self.read(len(s))
-		print("eClearStep\t<<\t",r)
-		
+		print("eClearStep",end='')
+		r = self.write_read(s)
+	
+	@add2queue	
 	def eSetMulty(self,stepper=1, multy=1):
 		u'''
 		Назначение: установка множителя полупериода тактовой частоты двигателя.
@@ -237,12 +242,9 @@ class SMD004():
 		'''
 		
 		s = self.ATrtAddr +b'\x06\x02'+bytearray([stepper, multy])
-		s = self.write(s)
-		print("eSetMulty\t>>\t",s)
-		#time.sleep(0.1)
-		r = self.read(len(s))
-		print("eSetMulty\t<<\t",r)
-
+		print("eSetMulty",end='')
+		r = self.write_read(s)
+	@add2queue
 	def eWriteMarchIHoldICode(self,stepper, Im=0, Is=0):
 		u'''
 		Назначение: установка маршевого тока и тока удержания двигателей.
@@ -272,18 +274,16 @@ class SMD004():
 		if Is!=0:
 			self.Is[stepper-1] = Is
 		s = self.ATrtAddr +b'\x07\x03'+bytearray([stepper,Im, Is])
-		s = self.write(s)
-		print("eWriteMarchIHoldICode\t>>\t",s)
-		#time.sleep(0.1)
-		r = self.read(len(s))
-		print("eWriteMarchIHoldICode\t<<\t",r)
-
+		print("eWriteMarchIHoldICode",end='')
+		r = self.write_read(s)
+	@add2queue
 	def eLock(self,stepper,state):
 		if state:
 			self.eWriteMarchIHoldICode(stepper,Im=self.Im[stepper-1],Is=self.Is[stepper-1])
 		else:
 			self.eWriteMarchIHoldICode(stepper,Im=self.Im[stepper-1],Is=0)
 
+	@add2queue
 	def eSetPhaseMode(self, stepper, mode='1x'):
 		u'''
 		•	Команда 8.
@@ -305,16 +305,14 @@ class SMD004():
 		self.write(b'\xFF\x08\x02'+bytearray([stepper])+b'\x10')
 		self.write(b'\xFF\x08\x02'+bytearray([stepper, mode]))
 		s = self.ATrtAddr +b'\x08\x02'+bytearray([stepper])+b'\x10'
-		s = self.write(s)
-		r = self.read(len(s))
+		print("eSetPhaseMode",end='')
+		r = self.write_read(s)
 
 		s = self.ATrtAddr +b'\x08\x02'+bytearray([stepper, mode])
-		s = self.write(s)
-		print("eSetPhaseMode\t>>\t",s)
-		#time.sleep(0.1)
-		r = self.read(len(s))
-		print("eSetPhaseMode\t<<\t",r)
+		print("eSetPhaseMode",end='')
+		r = self.write_read(s)
 
+	@add2queue
 	def makeStepCCW(self, stepper=1, steps=0, waitUntilReady=True,threadWait=False):
 		
 		#state = self.eGetState(0.02)
@@ -327,9 +325,10 @@ class SMD004():
 				self.waitUntilReadyState = True
 				while not self.forceStop and self.threadKillCounter<5:
 					if not self.lockFlow:
-						state = self.eGetState()
-						print("makeStepCCW_thread:",state)
 						time.sleep(0.5)
+						self.eGetState()
+						state = self.SM_state
+						#print("makeStepCCW_thread:",state)
 						try:
 							if state['SMs_state'] == 0:
 								self.SM_position[stepper-1]+=steps
@@ -338,14 +337,14 @@ class SMD004():
 						except:
 							pass
 					else:
-						time.sleep(1)
+						time.sleep(0.5)
 
 			if threadWait:
 				threading.Thread(target=wait).start()
 			else:
 				wait()
 			
-
+	@add2queue
 	def makeStepCW(self, stepper=1, steps=0, waitUntilReady=True,threadWait=False):
 		#state = self.eGetState(0.02)
 
@@ -359,34 +358,36 @@ class SMD004():
 				self.waitUntilReadyState = True
 				while not self.forceStop and self.threadKillCounter<5:
 					if not self.lockFlow:
-						state = self.eGetState()
-						print("makeStepCW_thread:",state)
-						time.sleep(0.1)
+
+						self.eGetState()
+						state = self.SM_state
+						#print("makeStepCW_thread:",state)
+						#time.sleep(0.5)
 						try:
 							if state['SMs_state'] == 0:
 								self.SM_position[stepper-1]-=steps
 								self.waitUntilReadyState = False
 								break
 						except:
-							self.waitUntilReadyState = False
-							pass
+							#self.waitUntilReadyState = False
+							traceback.print_exc()
 					else:
 						time.sleep(1)
 			if threadWait:
 				threading.Thread(target=wait).start()
 			else:
 				wait()
-			
+	@add2queue	
 	def moveCCW(self, stepper=1):
 		steps=0
 		self.eSetParams(stepper,'ccw2stop',steps)
 		self.eStart(stepper)
-
+	@add2queue
 	def moveCW(self, stepper=1):
 		steps=0
 		self.eSetParams(stepper,'cw2stop',steps)
 		self.eStart(stepper)
-
+	@add2queue
 	def eGetState(self,delay=0.01):
 		u'''
 		Назначение: запрос состояния двигателей.
@@ -417,12 +418,11 @@ class SMD004():
 		if self.isConnected():
 			
 			s = self.ATrtAddr +b'\x04\x00'
-			s = self.write(s)
-			#print("eGetState\t>>\t",s)
-
-			r = self.read(12)
-			#print("eGetState\t<<\t",r)
-
+			print("eGetState",end='')
+			r = self.write_read(s)
+			if not len(r)==12 and len(r)>2:
+				n = self.ser.inWaiting()
+				r+= self.ser.read(n)
 			if len(r)==12:
 				address,hex04,hex08,SMs_state, SM1_mode, SM1_steps0,SM1_steps1,SM2_mode, SM2_steps0,SM2_steps1, endstops, cSum = r
 				
@@ -433,10 +433,10 @@ class SMD004():
 				else:
 					SM1_steps = 65536-s1
 				s2 = int.from_bytes(bytearray([SM2_steps0,SM2_steps1]), byteorder='little')#,signed=False)
-				if s2==0:
-					SM2_steps = 0
-				else:
-					SM2_steps = 65536-s2
+				#if s2==0:
+				#	SM2_steps = 0
+				#else:
+				SM2_steps = s2
 				#print([int(i) for i in format(endstops, "08b")])
 				endstops = [int(i) for i in format(endstops, "08b")[:4]]
 				
@@ -445,9 +445,29 @@ class SMD004():
 															'SM2_steps':SM2_steps, 'SM2_mode':SM2_mode,
 															'SM2_end1':endstops[1], 'SM2_end2':endstops[0],
 															'SM1_end1':endstops[3], 'SM1_end2':endstops[2]}
-														
+					self.stateQueue.put(self.SM_state)							
 					return self.SM_state
+			else:
+				print(len(r))
 	
+	def write_read(self,data,delay=0.3):
+		self.lockFlow = True
+		if self.isConnected():
+			data = self.cSum(data)
+			if len(data)>4:
+				self.ser.write(data[:4])
+				time.sleep(0.02)
+				self.ser.write(data[4:])
+			else:
+				self.ser.write(data)
+			print("\t>>",data)
+			time.sleep(0.02)
+			r = self.ser.readline()
+			print("\t\t<<",r)
+			self.lockFlow = False
+			return r
+		else:
+			self.ser.close()
 
 	def write(self, data,delay=0.03):
 		self.lockFlow = True
@@ -464,12 +484,12 @@ class SMD004():
 			time.sleep(0.03)
 			total_len = 1
 			if len_check!=0:
-				for i in range(10):
-					time.sleep(0.03)
+				for i in range(len_check):
+					time.sleep(0.05)
 					n = self.ser.inWaiting()
 					r += self.ser.read(n)
 					total_len += n
-					time.sleep(0.03)
+					#time.sleep(0.03)
 					if total_len == len_check:
 						break
 		self.lockFlow = False

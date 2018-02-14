@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>704</width>
     <height>692</height>
    </rect>
   </property>
@@ -195,12 +195,12 @@ color: rgb(255, 137, 126);</string>
               </property>
               <property name="maximumSize">
                <size>
-                <width>400</width>
+                <width>200</width>
                 <height>16777215</height>
                </size>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>2</number>
               </property>
               <widget class="QWidget" name="dataSourcesPage_HAMEG">
                <attribute name="title">
@@ -803,6 +803,30 @@ color: rgb(255, 0, 0);</string>
                    </spacer>
                   </item>
                  </layout>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="dataSourcesPage_MAESTRO">
+               <attribute name="title">
+                <string>MAESTRO</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_4">
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="connectMAESTRO">
+                  <property name="text">
+                   <string>Connect</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="MAESTRO_val">
+                  <property name="text">
+                   <string>nan</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -1891,7 +1915,7 @@ color: rgb(255, 247, 8);</string>
                 <string>set SM1 Position Value</string>
                </property>
                <property name="autoFillBackground">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="text">
                 <string>Set</string>
@@ -2109,7 +2133,7 @@ color: rgb(255, 247, 8);</string>
                 <string>set SM2 Position Value</string>
                </property>
                <property name="autoFillBackground">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
                <property name="text">
                 <string>Set</string>
@@ -2400,8 +2424,8 @@ color: rgb(255, 247, 8);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>680</width>
-     <height>30</height>
+     <width>704</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFIle">
