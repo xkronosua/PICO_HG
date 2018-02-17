@@ -625,23 +625,26 @@ class PICO_HG(QtGui.QMainWindow):
 			self.measTimer.start(self.ui.measDelay.value())
 			
 			direction = 1 if self.ui.measForward.isChecked() else -1
+			self.SMD_endstopsTimer.stop()
 			if self.ui.measMode.currentText() == 'SM1_EndStop':
 				if direction == 1:
 					self.SM1_left2end()
 				else:
 					self.SM1_right2end()
+				#self.SMD_endstopsTimer.stop()
 			elif self.ui.measMode.currentText() == 'SM1_Step':
 				#self.oscilloSleep = True
-				self.SMD_endstopsTimer.stop()
+				#self.SMD_endstopsTimer.stop()
 				self.SMD.SMDSleep = True
 			elif self.ui.measMode.currentText() == 'SM2_EndStop':
 				if direction == 1:
 					self.SM2_left2end()
 				else:
 					self.SM2_right2end()
+				#self.SMD_endstopsTimer.stop()
 			elif self.ui.measMode.currentText() == 'SM2_Step':
 				#self.oscilloSleep = True
-				self.SMD_endstopsTimer.stop()
+				#self.SMD_endstopsTimer.stop()
 				self.SMD.SMDSleep = True
 
 			self.line0.setData(x=[],y=[])
@@ -672,9 +675,11 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.line2.setData(x=data[:,4], y=data[:,1])
 			#self.line3.setData(x=data[:,-1], y=data[:,2])
 			self.ui.measStart.setStyleSheet('background-color:green;')
-			self.SMD_endstopsTimer.start(1000)
+			self.SMD_endstopsTimer.start(2000)
 			if self.ui.CCD_connect.isChecked():
 				self.updateCCDTimer.start(500)
+			
+			
 			
 			
 	def onContMeasTimer(self):
@@ -707,6 +712,7 @@ class PICO_HG(QtGui.QMainWindow):
 					self.SM1_stepRight()
 				else:
 					self.SM1_stepLeft()
+				self.onSMD_endstopsTimer()
 				x = float(self.ui.SM1_position.text())
 				counter = float(self.ui.SM1_stepsCounter.text())
 			elif self.ui.measMode.currentText() == 'SM2_Step':
@@ -714,17 +720,18 @@ class PICO_HG(QtGui.QMainWindow):
 					self.SM2_stepRight()
 				else:
 					self.SM2_stepLeft()
+				self.onSMD_endstopsTimer()
 				x = float(self.ui.SM2_position.text())
 				counter = float(self.ui.SM2_stepsCounter.text())
 			if self.ui.measMode.currentText() == 'SM1_EndStop':
-				
+				self.onSMD_endstopsTimer()
 				x = float(self.ui.SM1_position.text())
 				counter = float(self.ui.SM1_stepsCounter.text())
 			elif self.ui.measMode.currentText() == 'SM2_EndStop':
-				
+				self.onSMD_endstopsTimer()
 				x = float(self.ui.SM2_position.text())
 				counter = float(self.ui.SM2_stepsCounter.text())
-			else: x=0
+			#else: x=0
 			self.SMD.SMDSleep = False
 			
 			y0 = float(self.ui.CH2Val.text())
@@ -783,8 +790,11 @@ class PICO_HG(QtGui.QMainWindow):
 	def _saveToBtn(self):
 		filename = self.fileDialog.getSaveFileName(self)
 		print(filename)
-		self.ui.measFilePath.setText(filename)
-
+		try:
+			self.ui.measFilePath.setText(filename)
+		except:
+			traceback.print_exc()
+			self.ui.measFilePath.setText(filename[0])
 
 	def openAngleSensorPort(self,state):
 		if state:
@@ -1072,11 +1082,11 @@ class PICO_HG(QtGui.QMainWindow):
 		
 		val1 = self.oscillo.dig2Volts(Vpp1, div[vdiv1])#(Vpp1)/256*(div[index1]*8)*1.333333
 		STD1 = 0
-		self.ui.CH1Val.setText(str(val1))
+		self.ui.CH1Val.setText(str(round(val1,13)))
 
 
 		val2 = self.oscillo.dig2Volts(Vpp2, div[vdiv2])#(Vpp2)/256*(div[index2]*8)*1.333333
-		self.ui.CH2Val.setText(str(val2))
+		self.ui.CH2Val.setText(str(round(val2,13)))
 
 		
 		return [val1,val2,STD1]
@@ -1157,7 +1167,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.SMD.eSetPhaseMode(2,0)
 			self.ui.SM1_position.setText(str(round(self.SMD.SM_position[0],6)))
 			self.ui.SM2_position.setText(str(round(self.SMD.SM_position[1],6)))
-			self.SMD_endstopsTimer.start(1000)
+			self.SMD_endstopsTimer.start(2000)
 			self.ui.SMD_connect.setStyleSheet('background-color:red;')
 		
 		else:
@@ -1166,6 +1176,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.ui.SMD_connect.setStyleSheet('background-color:green;')
 			
 	def onSMD_endstopsTimer(self):
+		self.SMD.commandQueue.join()
 		self.SMD.eGetState()
 		state = self.SMD.SM_state
 
@@ -1754,7 +1765,7 @@ class PICO_HG(QtGui.QMainWindow):
 if __name__ == "__main__":
 	signal.signal(signal.SIGINT, sigint_handler)
 	app = QtGui.QApplication(sys.argv)
-	app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+	#app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 	myWindow = PICO_HG(None)
 	app.exec_()
 	#SMD_CloseComPort()

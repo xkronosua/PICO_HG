@@ -121,7 +121,7 @@ color: rgb(255, 137, 126);</string>
          <number>999999</number>
         </property>
         <property name="value">
-         <number>500</number>
+         <number>2500</number>
         </property>
        </widget>
       </item>
@@ -200,7 +200,7 @@ color: rgb(255, 137, 126);</string>
                </size>
               </property>
               <property name="currentIndex">
-               <number>2</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="dataSourcesPage_HAMEG">
                <attribute name="title">
@@ -216,7 +216,7 @@ color: rgb(255, 137, 126);</string>
                    <widget class="QComboBox" name="oscilloVdiv2">
                     <property name="maximumSize">
                      <size>
-                      <width>100</width>
+                      <width>50</width>
                       <height>16777215</height>
                      </size>
                     </property>
@@ -370,7 +370,7 @@ color: rgb(255, 137, 126);</string>
                    <widget class="QComboBox" name="oscilloVdiv1">
                     <property name="maximumSize">
                      <size>
-                      <width>100</width>
+                      <width>50</width>
                       <height>16777215</height>
                      </size>
                     </property>

@@ -80,6 +80,7 @@ class SMD004():
 		self.threadKillCounter = 0
 	
 	def procThread(self):
+		#self.commandQueue.join()
 		while not self.forceStop and self.ser:
 			if not self.commandQueue.empty():
 				#print(self.ser,self.isConnected())
@@ -89,8 +90,8 @@ class SMD004():
 				self.commandQueue.task_done()
 				
 			else:
-
-				time.sleep(0.5)
+				
+				time.sleep(1)
 
 
 	def close(self):
@@ -535,8 +536,8 @@ if __name__ == "__main__":
 		#time.sleep(2)
 		#e.eStop()
 		e.eClearStep(3)
-		e.eSetTactFreq(1,60)
-		e.eSetMulty(1,1)
+		e.eSetTactFreq(1,224)
+		e.eSetMulty(1,2)
 
 		
 		#e.makeStepCCW(steps=600)
@@ -553,12 +554,20 @@ if __name__ == "__main__":
 		#print('+'*10,e.isConnected())
 		print('-'*50)
 		e.eWriteMarchIHoldICode(1,1,0)
-		e.eSetPhaseMode(1,10)
+		e.eSetPhaseMode(1,0)
 		#e.makeStepCW(1,2000,True)
-		e.makeStepCCW(1,5000)
-		for i in range(1000):
-			e.eGetState()
-			time.sleep(5)
+		#e.makeStepCCW(1,10)
+		state=False
+		while 1:
+			time.sleep(10)
+			state=~state
+			if state:
+				e.makeStepCW(1,10)
+			else:
+				e.makeStepCCW(1,10)
+		#for i in range(1000):
+		#	e.eGetState()
+		#	time.sleep(5)
 		#state=e.eGetState()
 		#while state[1][0]!=0:
 		#	state=e.eGetState()
@@ -577,7 +586,7 @@ if __name__ == "__main__":
 	except:
 		traceback.print_exc()
 		#e.ser.close()	
-	time.sleep(10)
+	#time.sleep(10)
 	e.eStop()
 	e.close()
 	print(e.isConnected())
