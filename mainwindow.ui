@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
+    <width>837</width>
     <height>692</height>
    </rect>
   </property>
@@ -123,6 +123,20 @@ color: rgb(255, 137, 126);</string>
         <property name="value">
          <number>2500</number>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="dataSource">
+        <item>
+         <property name="text">
+          <string>NI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>HAMEG</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -2424,8 +2438,8 @@ color: rgb(255, 247, 8);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>704</width>
-     <height>26</height>
+     <width>837</width>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFIle">

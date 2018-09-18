@@ -1245,3 +1245,29 @@
 #$STEP_MODE:SM1_Step
 #position	counter	ref	signal	ENERGY	Time
 -900.0	8267.0	2.81839409e-05	1.59204e-08	nan	1518865934.3294127
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_Step
+#position	counter	ref	signal	ENERGY	Time
+
+#$Filter:none
+#$	0	1	 1
+#$	1	op06	0.251188643150958
+#$	2	op09*op09	0.015848931924611138
+#$	3	op18*op18*op18	3.9810717055349725e-06
+#$	4	ns12	1e-7
+#$	5	0	 1e-22
+#$POWER:19.8, mW
+#$WAVELENGTH:1064,nm
+#$OBJECT:PVDF40, bscat	=	=
+#$STEP_MODE:SM1_Step
+#position	counter	ref	signal	ENERGY	Time

@@ -7,7 +7,7 @@
 
 
 import os
-import qdarkstyle
+#import qdarkstyle
 
 os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5' 
 
@@ -43,6 +43,16 @@ from datetime import datetime
 import SMD004_ as SMD004
 import traceback
 from TCD1304 import TCD1304
+
+MODE = 'lab'
+if len(sys.argv)>1:
+	if sys.argv[1]=='sim':
+		MODE = 'sim'
+
+if MODE == 'sim':
+	from daqmx1 import MultiChannelAnalogInputSim as MultiChannelAnalogInput
+else:
+	from daqmx1 import MultiChannelAnalogInput
 
 
 def sigint_handler(*args):
@@ -211,7 +221,11 @@ class PICO_HG(QtGui.QMainWindow):
 		self.oscilloLastMaster = 'HAMEG'
 
 		self.SMD = SMD004.SMD004()
+		
 		self.CCD = TCD1304()
+		self.niPorts = [b"Dev1/ai1", b"Dev1/ai3"]
+		self.niAI = MultiChannelAnalogInput(self.niPorts, N=1000)
+		self.niAI.configure()
 
 		#self.startLaserStrob(0.02)
 	def CCD_connect(self,state):
@@ -578,9 +592,11 @@ class PICO_HG(QtGui.QMainWindow):
 		#r=et.getDataProcN(2,100,chanels,True)
 		#name,tmp_filt,index = self.getCurrentFilter()
 		#print('Filter:',name,tmp_filt,index)
-		#r = self.oscilloGetData()
-		y0 = float(self.ui.CH2Val.text())
-		y1 = float(self.ui.CH1Val.text())
+		r = self.getData()
+		y0 = r[1]
+		y1 = r[0]
+		#y0 = float(self.ui.CH2Val.text())
+		#y1 = float(self.ui.CH1Val.text())
 		energy = float(self.ui.MAESTRO_val.text())
 
 		
@@ -697,10 +713,11 @@ class PICO_HG(QtGui.QMainWindow):
 			#	pass
 			#else:
 			self.measTimer.stop()
-			try:
-				self.oscilloGetData()
-			except AttributeError:
-				pass
+			r = self.getData()
+			y0 = r[1]
+			y1 = r[0]
+			y1_std = r[2]
+			energy = float(self.ui.MAESTRO_val.text())
 			#self.SMD.SMDSleep = True
 			#r = self.oscilloGetData()
 			
@@ -734,9 +751,9 @@ class PICO_HG(QtGui.QMainWindow):
 			#else: x=0
 			self.SMD.SMDSleep = False
 			
-			y0 = float(self.ui.CH2Val.text())
-			y1 = float(self.ui.CH1Val.text())
-			energy = float(self.ui.MAESTRO_val.text())
+			#y0 = float(self.ui.CH2Val.text())
+			#y1 = float(self.ui.CH1Val.text())
+			
 			#name,tmp_filt,index = self.getCurrentFilter()
 			#print('Filter:',name,float(tmp_filt),index)
 			#info = self.getNanoScatInfo(['angle', 'FW'])
@@ -943,7 +960,53 @@ class PICO_HG(QtGui.QMainWindow):
 			#self.stopDataBuffering()
 		else:
 			event.ignore()
+	def oscilloConnect(self, state):
+		source = self.ui.dataSource.currentText()
+		if source == 'HAMEG':
 
+
+			if state:
+				self.oscillo.connect()
+				r = self.oscillo.init()
+				print(r)
+				r = self.oscillo.vers()
+				print(r)
+				ch1_v = self.oscillo.get_vdiv1()
+				if self.ui.CH1_AC_DC.isChecked():
+					ch1_v -= 64
+				print(ch1_v)
+				self.ui.oscilloVdiv1.setCurrentIndex(ch1_v)
+				yp1 = self.oscillo.get_ypos1()
+				print(yp1)
+				self.ui.oscilloYpos1.setValue(yp1)
+
+				ch2_v = self.oscillo.get_vdiv2()
+				if self.ui.CH2_AC_DC.isChecked():
+					ch1_v -= 64
+				print(ch2_v)
+				self.ui.oscilloVdiv2.setCurrentIndex(ch2_v)
+				yp2 = self.oscillo.get_ypos2()
+				self.oscilloLastIndex = [ch1_v, ch2_v]
+				print(yp2)
+				self.ui.oscilloYpos2.setValue(yp2)
+
+				td = self.oscillo.get_tdiv()
+				print(td)
+				self.ui.oscilloTdiv.setCurrentIndex(td)
+
+				self.oscReadTimer.start(1000)
+
+			else:
+				self.oscReadTimer.stop()
+				self.oscillo.disconnect()
+				self.oscillo.close()
+		else:
+			print('NI_power')
+			if state:
+				self.oscReadTimer.start(300)
+			else:
+				self.oscReadTimer.stop()
+	"""
 	def oscilloConnect(self, state):
 		if state:
 			self.oscillo.connect()
@@ -1007,6 +1070,7 @@ class PICO_HG(QtGui.QMainWindow):
 			self.oscillo.close()
 			self.oscilloSleep = True
 			self.ui.oscilloConnect.setStyleSheet('background-color:green;')
+	"""
 
 	def oscilloGetData(self):
 		div = ( 0.001,0.002,0.005,
@@ -1091,7 +1155,7 @@ class PICO_HG(QtGui.QMainWindow):
 		
 		return [val1,val2,STD1]
 	
-
+	'''
 	def onOscReadTimer(self):
 		self.oscReadTimer.stop()
 		try:
@@ -1101,7 +1165,11 @@ class PICO_HG(QtGui.QMainWindow):
 
 		self.oscReadTimer.start(self.ui.measDelay.value())
 		print(res)
-	
+	'''
+		
+	def onOscReadTimer(self):
+		res = self.getData()
+		print(res)
 
 	def oscilloAutoSet(self):
 		self.oscilloSleep = True
@@ -1216,8 +1284,8 @@ class PICO_HG(QtGui.QMainWindow):
 			tab = np.loadtxt('SM2_step.table')
 
 		step=tab[0,1]
-		step_init = step                                                                                                                      							
-		if direction==1:               
+		step_init = step														      							
+		if direction==1:	       
 			if position > tab[-1,0]:   
 				step = tab[-1,1]
 			for i in range(len(tab)-1):
@@ -1226,17 +1294,17 @@ class PICO_HG(QtGui.QMainWindow):
 					if position+step>tab[i+1,0]:
 						step = tab[i+1,0]-position
 						if step <= 4: step = step_init
-					break                         
-		else:                                     
-			if position < tab[0,0]:               
-				step = tab[0,1]                                           
-			for i in range(len(tab)-1):                                     
-					if tab[i+1,0]>=position:                              
-						step = tab[i,1]                                   
-						if position-step<tab[i,0]:                        
+					break			 
+		else:				     
+			if position < tab[0,0]:	       
+				step = tab[0,1]					   
+			for i in range(len(tab)-1):				     
+					if tab[i+1,0]>=position:			      
+						step = tab[i,1]				   
+						if position-step<tab[i,0]:			
 							step = position-tab[i,0]
 							if step <= 4: step = step_init
-						break                          
+						break			  
 													  
 		return step
 
@@ -1586,7 +1654,7 @@ class PICO_HG(QtGui.QMainWindow):
 	
 	def initUi(self):
 		
-		
+			
 		###########   mainToolBar  #############
 		
 
@@ -1654,11 +1722,47 @@ class PICO_HG(QtGui.QMainWindow):
 
 		self.pw.setLabel('left', 'Signal', units='arb. un.')
 		self.pw.setLabel('bottom', 'position', units='deg.')
+		self.line_sig = self.osc_pw.plot()
+		self.line_sig.setPen(QtGui.QColor("orange"))
+		self.line_ref = self.osc_pw.plot()
+		self.line_ref.setPen(QtGui.QColor("cyan"))
+		self.line_ref_norm = self.osc_pw.plot()
+		self.line_ref_norm.setPen(QtGui.QColor("red"))
 		#self.pw.setXRange(0, 360)
 		#self.pw.setYRange(0, 1e10)
 		#self.pw2.setMaximumHeight(300)
 
+	def getData(self):
+		source = self.ui.dataSource.currentText()
+		if source == 'HAMEG':
+			return self.oscilloGetData()
+		else:
+			#data = self.niAI.readAll()
+			#r = #data[self.niPorts[0]]
+			#s = #data[self.niPorts[1]]
+			data = self.niAI.read_()
+			r = data[:,0]
+			s = data[:,1]
+			w = r>r.mean()
+			Vpp1 = abs(s[w].mean() - s[~w].mean())
+			#w1 = s>s.mean()
+			#Vpp1_1 =  abs(s[w1].mean() - s[~w1].mean())
+			#if Vpp1_1< Vpp1:
+			#Vpp1 = Vpp1_1
+			Vpp2 = r[w].mean() - r[~w].mean()
+			STD1 = s[w].std()
 
+			self.line_sig.setData(x=np.arange(len(s)),y=s)
+			self.line_ref.setData(x=np.arange(len(r)),y=r)
+			ref_norm = w*20-10
+			#self.line_ref_norm.setData(x=np.arange(len(ref_norm)),y=ref_norm)
+			self.ui.CH1Val.setText(str(Vpp1))
+			self.ui.CH2Val.setText(str(Vpp2))
+			self.ui.oscilloFreq.setText(str(0))
+			#self.ui.duty_cycle.setText(str(0))
+
+			self.ui.CH1Val_std.setText(str(STD1))
+			return (Vpp1, Vpp2, STD1)
 
 	def uiConnect(self):
 		
@@ -1747,7 +1851,7 @@ class PICO_HG(QtGui.QMainWindow):
 		self.oscReadTimer.timeout.connect(self.onOscReadTimer)
 
 		self.updateCCDTimer.timeout.connect(self.onUpdateCCDTimer)
-
+		self.oscReadTimer.timeout.connect(self.onOscReadTimer)
 		self.SMD_endstopsTimer.timeout.connect(self.onSMD_endstopsTimer)
 		#self.calibrFWTimer.timeout.connect(self.onCalibrFWTimer)
 		#self.stepperStateTimer.timeout.connect(self.checkStepperState)
